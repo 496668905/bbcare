@@ -68,6 +68,70 @@ const categories = [
       { emoji: "🛌", en: "sleep", zh: "睡觉" },
       { emoji: "🕺", en: "dance", zh: "跳舞" }
     ]
+  },
+  {
+    id: "family",
+    en: "family",
+    zh: "家人",
+    emoji: "👨‍👩‍👧",
+    words: [
+      { emoji: "👩", en: "mama", zh: "妈妈" },
+      { emoji: "👨", en: "dada", zh: "爸爸" },
+      { emoji: "👵", en: "grandma", zh: "奶奶/外婆" },
+      { emoji: "👴", en: "grandpa", zh: "爷爷/外公" },
+      { emoji: "👶", en: "baby", zh: "宝宝" },
+      { emoji: "👧", en: "sister", zh: "姐姐/妹妹" },
+      { emoji: "👦", en: "brother", zh: "哥哥/弟弟" },
+      { emoji: "👪", en: "family", zh: "家" }
+    ]
+  },
+  {
+    id: "daily_items",
+    en: "daily items",
+    zh: "日常用品",
+    emoji: "🍼",
+    words: [
+      { emoji: "🍼", en: "bottle", zh: "奶瓶" },
+      { emoji: "🧷", en: "diaper", zh: "尿不湿" },
+      { emoji: "🧣", en: "bib", zh: "围兜" },
+      { emoji: "🧸", en: "toy", zh: "玩具" },
+      { emoji: "🛏️", en: "bed", zh: "小床" },
+      { emoji: "🧺", en: "towel", zh: "毛巾" },
+      { emoji: "🛁", en: "bathtub", zh: "浴盆" },
+      { emoji: "🧴", en: "lotion", zh: "润肤乳" }
+    ]
+  },
+  {
+    id: "routines",
+    en: "routines",
+    zh: "日常流程",
+    emoji: "🌞",
+    words: [
+      { emoji: "☀️", en: "wake up", zh: "起床" },
+      { emoji: "🍼", en: "drink milk", zh: "喝奶" },
+      { emoji: "🍽️", en: "eat", zh: "吃饭" },
+      { emoji: "🛁", en: "bath", zh: "洗澡" },
+      { emoji: "🪥", en: "brush", zh: "刷牙" },
+      { emoji: "📖", en: "read", zh: "看书" },
+      { emoji: "🚶", en: "go out", zh: "出门" },
+      { emoji: "🌙", en: "good night", zh: "晚安" }
+    ]
+  },
+  {
+    id: "places",
+    en: "places",
+    zh: "生活场景",
+    emoji: "🏡",
+    words: [
+      { emoji: "🏠", en: "home", zh: "家里" },
+      { emoji: "🛏️", en: "bedroom", zh: "卧室" },
+      { emoji: "🛋️", en: "living room", zh: "客厅" },
+      { emoji: "🍳", en: "kitchen", zh: "厨房" },
+      { emoji: "🚿", en: "bathroom", zh: "洗手间" },
+      { emoji: "🌳", en: "park", zh: "公园" },
+      { emoji: "🛒", en: "shop", zh: "商店" },
+      { emoji: "🚗", en: "car", zh: "车里" }
+    ]
   }
 ];
 
