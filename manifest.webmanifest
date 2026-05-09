@@ -1,0 +1,24 @@
+{
+  "name": "Baby English",
+  "short_name": "BabyEng",
+  "description": "婴儿英语启蒙：动物、颜色、食物、身体、动作",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#fff9f4",
+  "theme_color": "#fff4ec",
+  "lang": "zh-CN",
+  "icons": [
+    {
+      "src": "./icon-192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "./icon-512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
