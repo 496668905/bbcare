@@ -60,3 +60,7 @@ GitHub 仓库 -> Settings -> Secrets and variables -> Actions -> New repository 
 - iPhone/iPad (Safari)：分享 -> 添加到主屏幕  
 
 建议每次发版后在手机上强刷一次页面，确保拿到最新缓存。
+
+## 发布验证记录
+
+- 2026-05-09：首次启用 GitHub Actions -> Netlify 自动部署链路。
