@@ -807,8 +807,46 @@
         return voices.find((v) => v.lang.toLowerCase().startsWith("zh-cn")) || voices[0];
       }
 
+      const SILENT_WAV =
+        "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA";
+
       const lessonAudioPlayer = new Audio();
       lessonAudioPlayer.preload = "auto";
+      try {
+        lessonAudioPlayer.playsInline = true;
+      } catch {
+        /* ignore */
+      }
+      lessonAudioPlayer.setAttribute("playsinline", "");
+
+      const gestureUnlockAudio = new Audio();
+      gestureUnlockAudio.preload = "auto";
+      try {
+        gestureUnlockAudio.playsInline = true;
+      } catch {
+        /* ignore */
+      }
+      gestureUnlockAudio.setAttribute("playsinline", "");
+
+      async function unlockAudioPlaybackFromGesture() {
+        gestureUnlockAudio.muted = true;
+        gestureUnlockAudio.src = SILENT_WAV;
+        try {
+          await gestureUnlockAudio.play();
+        } catch {
+          /* Mobile Safari is strict; real clips may still fail without this unlock pass. */
+        } finally {
+          gestureUnlockAudio.pause();
+          gestureUnlockAudio.currentTime = 0;
+          gestureUnlockAudio.removeAttribute("src");
+          try {
+            gestureUnlockAudio.load();
+          } catch {
+            /* ignore */
+          }
+          gestureUnlockAudio.muted = false;
+        }
+      }
 
       function getCurrentLineAudioKey() {
         const level = getCurrentLevel();
@@ -821,6 +859,7 @@
           lessonAudioPlayer.src = src;
           lessonAudioPlayer.currentTime = 0;
           lessonAudioPlayer.playbackRate = playbackRate;
+          lessonAudioPlayer.load();
           await new Promise((resolve, reject) => {
             lessonAudioPlayer.onended = () => resolve();
             lessonAudioPlayer.onerror = () => reject(new Error("audio failed"));
@@ -837,6 +876,9 @@
           return Promise.resolve();
         }
         speechSynthesis.cancel();
+        if (speechSynthesis.paused) {
+          speechSynthesis.resume();
+        }
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.lang = options.lang || "en-US";
         utterance.rate = options.rate ?? 0.86;
@@ -1076,10 +1118,15 @@
         lessonAudioPlayer.src = "";
       }
 
+      async function startAutoPlayFromGesture(options = {}) {
+        await unlockAudioPlaybackFromGesture();
+        await startAutoPlay(options);
+      }
+
       async function startAutoPlay(options = {}) {
         stopAutoPlay();
         if (state.keepAwakeEnabled && !wakeLockSentinel) {
-          await requestWakeLock();
+          void requestWakeLock();
         }
         const fromUnitStart = Boolean(options.fromUnitStart);
         const fromLevelStart = Boolean(options.fromLevelStart);
@@ -1264,25 +1311,25 @@
         speak(getCurrentLine().en, { lang: "en-US", rate: 1, audioKey: getCurrentLineAudioKey() })
       );
       speakZhBtn.addEventListener("click", () => speak(getCurrentLine().zh, { lang: "zh-CN", rate: 0.93 }));
-      autoPlayBtn.addEventListener("click", () => {
+      autoPlayBtn.addEventListener("click", async () => {
         if (state.autoPlaying) {
           stopAutoPlay();
           return;
         }
-        startAutoPlay({ fromUnitStart: false, loopCurrentUnit: true, repeat: true });
+        await startAutoPlayFromGesture({ fromUnitStart: false, loopCurrentUnit: true, repeat: true });
       });
-      restartAutoBtn.addEventListener("click", () =>
-        startAutoPlay({ fromUnitStart: true, loopCurrentUnit: true, repeat: true })
-      );
-      levelAutoBtn.addEventListener("click", () =>
-        startAutoPlay({ fromLevelStart: true, loopCurrentUnit: false, repeat: true })
-      );
-      unitAutoBtn.addEventListener("click", () =>
-        startAutoPlay({ fromUnitStart: true, loopCurrentUnit: true, repeat: true })
-      );
-      startDailyPlanBtn.addEventListener("click", () =>
-        startAutoPlay({ fromLevelStart: true, loopCurrentUnit: false, repeat: false })
-      );
+      restartAutoBtn.addEventListener("click", async () => {
+        await startAutoPlayFromGesture({ fromUnitStart: true, loopCurrentUnit: true, repeat: true });
+      });
+      levelAutoBtn.addEventListener("click", async () => {
+        await startAutoPlayFromGesture({ fromLevelStart: true, loopCurrentUnit: false, repeat: true });
+      });
+      unitAutoBtn.addEventListener("click", async () => {
+        await startAutoPlayFromGesture({ fromUnitStart: true, loopCurrentUnit: true, repeat: true });
+      });
+      startDailyPlanBtn.addEventListener("click", async () => {
+        await startAutoPlayFromGesture({ fromLevelStart: true, loopCurrentUnit: false, repeat: false });
+      });
       stopDailyPlanBtn.addEventListener("click", stopAutoPlay);
       startRecBtn.addEventListener("click", startRecognition);
       markDoneBtn.addEventListener("click", markSentenceMastered);
