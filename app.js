@@ -152,6 +152,7 @@ const wordCountValue = document.getElementById("wordCountValue");
 const delayValue = document.getElementById("delayValue");
 const parentLearningToggle = document.getElementById("parentLearningToggle");
 const englishVoiceSelect = document.getElementById("englishVoiceSelect");
+const childAudioEngineSelect = document.getElementById("childAudioEngineSelect");
 const ttsEngineSelect = document.getElementById("ttsEngineSelect");
 const azureRegionInput = document.getElementById("azureRegionInput");
 const azureApiKeyInput = document.getElementById("azureApiKeyInput");
@@ -166,6 +167,7 @@ let currentWordSet = [];
 let isDailyMode = false;
 let currentCloudAudio = null;
 let cloudTtsAbortController = null;
+const childEnglishAudioPlayer = new Audio();
 
 const SETTINGS_KEY = "baby_english_settings";
 const defaultSettings = {
@@ -174,6 +176,7 @@ const defaultSettings = {
   autoplayGapMs: 2200,
   parentLearningMode: false,
   englishVoicePref: "us",
+  childAudioEngine: "system",
   ttsEngine: "system",
   azureRegion: "eastasia",
   azureApiKey: "",
@@ -184,6 +187,9 @@ const defaultSettings = {
 const settings = loadSettings();
 if (!["us", "uk", "auto"].includes(settings.englishVoicePref)) {
   settings.englishVoicePref = "us";
+}
+if (!["system", "local"].includes(settings.childAudioEngine)) {
+  settings.childAudioEngine = "system";
 }
 if (!["system", "azure"].includes(settings.ttsEngine)) {
   settings.ttsEngine = "system";
@@ -436,6 +442,41 @@ function pickChineseVoice() {
   return scored[0].voice;
 }
 
+function getChildAudioKey(text) {
+  return text
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "");
+}
+
+function stopChildLocalAudio() {
+  childEnglishAudioPlayer.pause();
+  childEnglishAudioPlayer.src = "";
+}
+
+async function playChildEnglishLocalAudio(text, rate = 1) {
+  const key = getChildAudioKey(text);
+  if (!key) {
+    return false;
+  }
+  const src = `./audio/children/en/${key}.mp3`;
+  try {
+    stopChildLocalAudio();
+    childEnglishAudioPlayer.src = src;
+    childEnglishAudioPlayer.currentTime = 0;
+    childEnglishAudioPlayer.playbackRate = rate;
+    await new Promise((resolve, reject) => {
+      childEnglishAudioPlayer.onended = () => resolve();
+      childEnglishAudioPlayer.onerror = () => reject(new Error("audio failed"));
+      childEnglishAudioPlayer.play().catch(reject);
+    });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 function escapeForSsml(text) {
   return text
     .replaceAll("&", "&amp;")
@@ -533,6 +574,30 @@ async function speakByAzure(text, config = {}) {
 }
 
 function speakText(text, config = {}) {
+  const shouldUseLocalChildAudio =
+    config.voiceType !== "chinese" &&
+    settings.childAudioEngine === "local";
+  if (shouldUseLocalChildAudio) {
+    return playChildEnglishLocalAudio(text, config.rate ?? 1).then((played) => {
+      if (played) {
+        return;
+      }
+      const shouldUseAzureFallback =
+        settings.ttsEngine === "azure" &&
+        settings.azureApiKey.trim() &&
+        settings.azureRegion.trim();
+      if (shouldUseAzureFallback) {
+        return speakByAzure(text, config).then((azurePlayed) => {
+          if (azurePlayed) {
+            return;
+          }
+          return speakTextBySystem(text, config);
+        });
+      }
+      return speakTextBySystem(text, config);
+    });
+  }
+
   const shouldUseAzure =
     settings.ttsEngine === "azure" &&
     settings.azureApiKey.trim() &&
@@ -591,6 +656,7 @@ async function speakWord(word, options = {}) {
     window.speechSynthesis.cancel();
   }
   cancelCloudSpeech();
+  stopChildLocalAudio();
 
   const englishLang = settings.englishVoicePref === "uk" ? "en-GB" : "en-US";
 
@@ -755,6 +821,7 @@ function syncSettingsUi() {
   delayValue.textContent = (settings.autoplayGapMs / 1000).toFixed(1);
   parentLearningToggle.checked = settings.parentLearningMode;
   englishVoiceSelect.value = settings.englishVoicePref;
+  childAudioEngineSelect.value = settings.childAudioEngine;
   ttsEngineSelect.value = settings.ttsEngine;
   azureRegionInput.value = settings.azureRegion;
   azureApiKeyInput.value = settings.azureApiKey;
@@ -818,6 +885,10 @@ function setupParentMode() {
     settings.englishVoicePref = englishVoiceSelect.value;
     saveSettings();
   });
+  childAudioEngineSelect.addEventListener("change", () => {
+    settings.childAudioEngine = childAudioEngineSelect.value;
+    saveSettings();
+  });
   ttsEngineSelect.addEventListener("change", () => {
     settings.ttsEngine = ttsEngineSelect.value;
     saveSettings();
@@ -844,6 +915,7 @@ function setAutoplayButton(active) {
 function stopAutoplay() {
   autoplaySessionToken += 1;
   cancelCloudSpeech();
+  stopChildLocalAudio();
   if ("speechSynthesis" in window) {
     window.speechSynthesis.cancel();
   }
