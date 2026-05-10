@@ -273,6 +273,17 @@
           <p id="voiceTipText">免费方案：iPad 设置 -> 辅助功能 -> 朗读内容 -> 声音（English）下载增强语音，听感会更自然。</p>
         </section>
 
+        <section class="panel">
+          <h3>车载后台模式（防息屏）</h3>
+          <p id="backgroundHintText">开启后会尽量保持屏幕常亮，避免播放被系统中断。</p>
+          <section class="grid2" style="margin-bottom: 0;">
+            <button id="enableBgModeBtn" class="btn secondary" type="button">开启防息屏</button>
+            <button id="disableBgModeBtn" class="btn secondary" type="button">关闭防息屏</button>
+          </section>
+          <p id="bgModeStatusText">状态：未开启</p>
+          <p>说明：iPhone 网页 TTS 在“真正息屏后”可能仍会被系统暂停，防息屏模式可显著提升车载连续播放稳定性。</p>
+        </section>
+
         <section class="grid2">
           <button id="prevUnitBtn" class="btn secondary" type="button">上一课</button>
           <button id="nextUnitBtn" class="btn secondary" type="button">下一课</button>
@@ -609,7 +620,8 @@
         progress: loadProgress(),
         currentDrillSentence: "",
         reviewIndex: 0,
-        currentAutoScope: "unit"
+        currentAutoScope: "unit",
+        keepAwakeEnabled: false
       };
 
       const homeBtn = document.getElementById("homeBtn");
@@ -632,6 +644,10 @@
       const testVoiceBtn = document.getElementById("testVoiceBtn");
       const saveVoiceBtn = document.getElementById("saveVoiceBtn");
       const voiceTipText = document.getElementById("voiceTipText");
+      const enableBgModeBtn = document.getElementById("enableBgModeBtn");
+      const disableBgModeBtn = document.getElementById("disableBgModeBtn");
+      const bgModeStatusText = document.getElementById("bgModeStatusText");
+      const backgroundHintText = document.getElementById("backgroundHintText");
       const prevUnitBtn = document.getElementById("prevUnitBtn");
       const nextUnitBtn = document.getElementById("nextUnitBtn");
       const topicText = document.getElementById("topicText");
@@ -803,6 +819,51 @@
         return speakBySystem(text, { ...options, lang: options.lang || "en-US" });
       }
 
+      let wakeLockSentinel = null;
+
+      async function requestWakeLock() {
+        if (!("wakeLock" in navigator)) {
+          bgModeStatusText.textContent = "状态：设备不支持防息屏（请手动设为自动锁定-永不）";
+          return false;
+        }
+        try {
+          wakeLockSentinel = await navigator.wakeLock.request("screen");
+          wakeLockSentinel.addEventListener("release", () => {
+            if (state.keepAwakeEnabled) {
+              bgModeStatusText.textContent = "状态：防息屏已中断，尝试重新获取...";
+            } else {
+              bgModeStatusText.textContent = "状态：未开启";
+            }
+          });
+          bgModeStatusText.textContent = "状态：防息屏已开启";
+          return true;
+        } catch {
+          bgModeStatusText.textContent = "状态：开启失败（请检查浏览器权限）";
+          return false;
+        }
+      }
+
+      async function enableKeepAwakeMode() {
+        state.keepAwakeEnabled = true;
+        const ok = await requestWakeLock();
+        if (!ok) {
+          backgroundHintText.textContent =
+            "当前浏览器可能不支持防息屏。建议 iPhone 设置中临时把自动锁定改为永不。";
+        } else {
+          backgroundHintText.textContent = "防息屏已开启，车载连续听练稳定性更好。";
+        }
+      }
+
+      function disableKeepAwakeMode() {
+        state.keepAwakeEnabled = false;
+        if (wakeLockSentinel) {
+          wakeLockSentinel.release().catch(() => {});
+          wakeLockSentinel = null;
+        }
+        bgModeStatusText.textContent = "状态：未开启";
+        backgroundHintText.textContent = "你可以随时重新开启防息屏模式。";
+      }
+
       function wait(ms) {
         return new Promise((resolve) => setTimeout(resolve, ms));
       }
@@ -944,6 +1005,8 @@
         drillSentence.textContent = drill.sentence;
         levelAutoBtn.classList.toggle("active", state.currentAutoScope === "level");
         unitAutoBtn.classList.toggle("active", state.currentAutoScope === "unit");
+        enableBgModeBtn.classList.toggle("active", state.keepAwakeEnabled);
+        disableBgModeBtn.classList.toggle("active", !state.keepAwakeEnabled);
         voicePresetSelect.value = state.progress.voicePreset;
         voiceTipText.textContent = "当前使用系统语音：iPad 可在设置中下载 English 增强语音，听感会明显更好。";
       }
@@ -959,6 +1022,9 @@
 
       async function startAutoPlay(options = {}) {
         stopAutoPlay();
+        if (state.keepAwakeEnabled && !wakeLockSentinel) {
+          await requestWakeLock();
+        }
         const fromUnitStart = Boolean(options.fromUnitStart);
         const fromLevelStart = Boolean(options.fromLevelStart);
         const loopCurrentUnit = Boolean(options.loopCurrentUnit);
@@ -1115,6 +1181,7 @@
 
       homeBtn.addEventListener("click", () => {
         stopAutoPlay();
+        disableKeepAwakeMode();
         window.location.href = "./index.html";
       });
       modeBtn.addEventListener("click", () => {
@@ -1207,6 +1274,14 @@
         saveProgress();
         render();
       });
+      enableBgModeBtn.addEventListener("click", enableKeepAwakeMode);
+      disableBgModeBtn.addEventListener("click", disableKeepAwakeMode);
+      document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "visible" && state.keepAwakeEnabled && !wakeLockSentinel) {
+          requestWakeLock();
+        }
+      });
+      window.addEventListener("beforeunload", disableKeepAwakeMode);
 
       render();
     </script>
