@@ -150,23 +150,44 @@ const wordCountInput = document.getElementById("wordCountInput");
 const delayInput = document.getElementById("delayInput");
 const wordCountValue = document.getElementById("wordCountValue");
 const delayValue = document.getElementById("delayValue");
+const parentLearningToggle = document.getElementById("parentLearningToggle");
+const englishVoiceSelect = document.getElementById("englishVoiceSelect");
+const ttsEngineSelect = document.getElementById("ttsEngineSelect");
+const azureRegionInput = document.getElementById("azureRegionInput");
+const azureApiKeyInput = document.getElementById("azureApiKeyInput");
 
 let currentCategoryIndex = null;
-let lastSpokenWord = "";
+let lastSpokenEntry = null;
 let touchStartX = null;
 let titleLongPressTimer = null;
 let autoplaySessionToken = 0;
 let playingWordIndex = null;
 let currentWordSet = [];
 let isDailyMode = false;
+let currentCloudAudio = null;
+let cloudTtsAbortController = null;
 
 const SETTINGS_KEY = "baby_english_settings";
 const defaultSettings = {
   slowMode: true,
   autoplayWordCount: 4,
-  autoplayGapMs: 2200
+  autoplayGapMs: 2200,
+  parentLearningMode: false,
+  englishVoicePref: "us",
+  ttsEngine: "system",
+  azureRegion: "eastasia",
+  azureApiKey: "",
+  azureEnglishVoiceUs: "en-US-JennyNeural",
+  azureEnglishVoiceUk: "en-GB-SoniaNeural",
+  azureChineseVoice: "zh-CN-XiaoxiaoNeural"
 };
 const settings = loadSettings();
+if (!["us", "uk", "auto"].includes(settings.englishVoicePref)) {
+  settings.englishVoicePref = "us";
+}
+if (!["system", "azure"].includes(settings.ttsEngine)) {
+  settings.ttsEngine = "system";
+}
 
 function createHome() {
   const wrap = document.createElement("div");
@@ -196,7 +217,23 @@ function createHome() {
   dailyBtn.textContent = "今日10词";
   dailyBtn.addEventListener("click", openDailyMode);
 
-  homeView.replaceChildren(wrap, dailyBtn, tip);
+  const storyBtn = document.createElement("button");
+  storyBtn.className = "big-btn story-btn";
+  storyBtn.type = "button";
+  storyBtn.textContent = "绘本故事";
+  storyBtn.addEventListener("click", () => {
+    window.location.href = "./story.html";
+  });
+
+  const adultBtn = document.createElement("button");
+  adultBtn.className = "big-btn adult-btn";
+  adultBtn.type = "button";
+  adultBtn.textContent = "大人口语";
+  adultBtn.addEventListener("click", () => {
+    window.location.href = "./adult.html";
+  });
+
+  homeView.replaceChildren(wrap, dailyBtn, storyBtn, adultBtn, tip);
 }
 
 function createTabs() {
@@ -269,63 +306,325 @@ function renderWords(words) {
     card.addEventListener("click", () => {
       stopAutoplay();
       setPlayingWord(index);
-      speak(word.en, { wordIndex: index });
+      speakWord(word, { wordIndex: index });
     });
     card.addEventListener("keydown", (event) => {
       if (event.key === "Enter" || event.key === " ") {
         event.preventDefault();
         stopAutoplay();
         setPlayingWord(index);
-        speak(word.en, { wordIndex: index });
+        speakWord(word, { wordIndex: index });
       }
     });
     card.querySelector(".mini-replay").addEventListener("click", (event) => {
       event.stopPropagation();
       stopAutoplay();
       setPlayingWord(index);
-      speak(word.en, { wordIndex: index });
+      speakWord(word, { wordIndex: index });
     });
     wordGrid.appendChild(card);
   });
 }
 
-function speak(text, options = {}) {
+function getEnglishVoiceScore(voice, preference) {
+  const lang = voice.lang.toLowerCase();
+  const name = voice.name.toLowerCase();
+  let score = 0;
+
+  if (voice.default) {
+    score += 6;
+  }
+  if (name.includes("natural") || name.includes("neural")) {
+    score += 25;
+  }
+  if (name.includes("online")) {
+    score += 12;
+  }
+  if (name.includes("microsoft") || name.includes("google")) {
+    score += 8;
+  }
+  if (name.includes("samantha") || name.includes("aria") || name.includes("jenny")) {
+    score += 8;
+  }
+  if (
+    name.includes("whisper") ||
+    name.includes("espeak") ||
+    name.includes("festival") ||
+    name.includes("robot")
+  ) {
+    score -= 60;
+  }
+
+  if (preference === "us") {
+    if (lang === "en-us" || lang.startsWith("en-us")) {
+      score += 60;
+    }
+    if (
+      name.includes("american") ||
+      name.includes("united states") ||
+      name.includes("en-us")
+    ) {
+      score += 30;
+    }
+    if (lang === "en-gb" || lang.startsWith("en-gb")) {
+      score += 8;
+    }
+  } else if (preference === "uk") {
+    if (lang === "en-gb" || lang.startsWith("en-gb")) {
+      score += 60;
+    }
+    if (
+      name.includes("british") ||
+      name.includes("united kingdom") ||
+      name.includes("en-gb")
+    ) {
+      score += 30;
+    }
+    if (lang === "en-us" || lang.startsWith("en-us")) {
+      score += 8;
+    }
+  } else if (lang === "en-us" || lang.startsWith("en-us") || lang === "en-gb" || lang.startsWith("en-gb")) {
+    score += 35;
+  } else {
+    score += 12;
+  }
+
+  return score;
+}
+
+function pickEnglishVoice() {
+  const voices = window.speechSynthesis.getVoices();
+  const englishVoices = voices.filter((voice) => voice.lang.toLowerCase().startsWith("en"));
+  if (englishVoices.length === 0) {
+    return null;
+  }
+  const scored = englishVoices
+    .map((voice) => ({
+      voice,
+      score: getEnglishVoiceScore(voice, settings.englishVoicePref)
+    }))
+    .sort((a, b) => b.score - a.score);
+  return scored[0].voice;
+}
+
+function pickChineseVoice() {
+  const voices = window.speechSynthesis.getVoices();
+  const zhVoices = voices.filter((voice) => voice.lang.toLowerCase().startsWith("zh"));
+  if (zhVoices.length === 0) {
+    return null;
+  }
+  const scored = zhVoices
+    .map((voice) => {
+      const lang = voice.lang.toLowerCase();
+      const name = voice.name.toLowerCase();
+      let score = 0;
+      if (lang === "zh-cn" || lang.startsWith("zh-cn")) {
+        score += 30;
+      }
+      if (voice.default) {
+        score += 6;
+      }
+      if (name.includes("natural") || name.includes("neural")) {
+        score += 16;
+      }
+      if (name.includes("espeak") || name.includes("robot")) {
+        score -= 50;
+      }
+      return { voice, score };
+    })
+    .sort((a, b) => b.score - a.score);
+  return scored[0].voice;
+}
+
+function escapeForSsml(text) {
+  return text
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&apos;");
+}
+
+function getAzureEndpoint() {
+  const region = settings.azureRegion.trim();
+  if (!region) {
+    return "";
+  }
+  return `https://${region}.tts.speech.microsoft.com/cognitiveservices/v1`;
+}
+
+function getAzureVoiceName(voiceType) {
+  if (voiceType === "chinese") {
+    return settings.azureChineseVoice;
+  }
+  if (settings.englishVoicePref === "uk") {
+    return settings.azureEnglishVoiceUk;
+  }
+  return settings.azureEnglishVoiceUs;
+}
+
+function cancelCloudSpeech() {
+  if (cloudTtsAbortController) {
+    cloudTtsAbortController.abort();
+    cloudTtsAbortController = null;
+  }
+  if (currentCloudAudio) {
+    currentCloudAudio.pause();
+    currentCloudAudio.src = "";
+    currentCloudAudio = null;
+  }
+}
+
+async function speakByAzure(text, config = {}) {
+  const apiKey = settings.azureApiKey.trim();
+  const endpoint = getAzureEndpoint();
+  const voiceName = getAzureVoiceName(config.voiceType);
+  if (!apiKey || !endpoint || !voiceName) {
+    return false;
+  }
+
+  cancelCloudSpeech();
+  cloudTtsAbortController = new AbortController();
+
+  const safeText = escapeForSsml(text);
+  const ratePercent = Math.round(((config.rate ?? 1) - 1) * 100);
+  const ssml = `<?xml version="1.0" encoding="utf-8"?>
+<speak version="1.0" xml:lang="${config.lang || "en-US"}">
+  <voice name="${voiceName}">
+    <prosody rate="${ratePercent >= 0 ? "+" : ""}${ratePercent}%">${safeText}</prosody>
+  </voice>
+</speak>`;
+
+  try {
+    const response = await fetch(endpoint, {
+      method: "POST",
+      headers: {
+        "Ocp-Apim-Subscription-Key": apiKey,
+        "Content-Type": "application/ssml+xml",
+        "X-Microsoft-OutputFormat": "audio-16khz-64kbitrate-mono-mp3",
+        "User-Agent": "bbcare"
+      },
+      body: ssml,
+      signal: cloudTtsAbortController.signal
+    });
+    if (!response.ok) {
+      return false;
+    }
+
+    const audioBlob = await response.blob();
+    const audioUrl = URL.createObjectURL(audioBlob);
+    const audio = new Audio(audioUrl);
+    currentCloudAudio = audio;
+
+    await new Promise((resolve) => {
+      audio.onended = resolve;
+      audio.onerror = resolve;
+      audio.play().catch(resolve);
+    });
+    URL.revokeObjectURL(audioUrl);
+    currentCloudAudio = null;
+    cloudTtsAbortController = null;
+    return true;
+  } catch {
+    currentCloudAudio = null;
+    cloudTtsAbortController = null;
+    return false;
+  }
+}
+
+function speakText(text, config = {}) {
+  const shouldUseAzure =
+    settings.ttsEngine === "azure" &&
+    settings.azureApiKey.trim() &&
+    settings.azureRegion.trim();
+
+  if (shouldUseAzure) {
+    return speakByAzure(text, config).then((played) => {
+      if (played) {
+        return;
+      }
+      return speakTextBySystem(text, config);
+    });
+  }
+  return speakTextBySystem(text, config);
+}
+
+function speakTextBySystem(text, config = {}) {
   if (!("speechSynthesis" in window)) {
     return Promise.resolve();
   }
-
-  lastSpokenWord = text;
-  replayBtn.classList.remove("hidden");
-  window.speechSynthesis.cancel();
   const utterance = new SpeechSynthesisUtterance(text);
-  utterance.lang = "en-US";
-  utterance.rate = settings.slowMode ? 0.78 : 0.95;
-  utterance.pitch = 1;
-  utterance.volume = 1;
+  utterance.lang = config.lang || "en-US";
+  utterance.rate = config.rate ?? 0.92;
+  utterance.pitch = config.pitch ?? 1;
+  utterance.volume = config.volume ?? 1;
 
-  const voices = window.speechSynthesis.getVoices();
-  const preferredVoice = voices.find(
-    (voice) => voice.lang.startsWith("en") && !voice.name.toLowerCase().includes("whisper")
-  );
-  if (preferredVoice) {
-    utterance.voice = preferredVoice;
+  if (config.voiceType === "chinese") {
+    const zhVoice = pickChineseVoice();
+    if (zhVoice) {
+      utterance.voice = zhVoice;
+    }
+  } else {
+    const enVoice = pickEnglishVoice();
+    if (enVoice) {
+      utterance.voice = enVoice;
+    }
   }
 
   return new Promise((resolve) => {
-    utterance.onend = () => {
-      if (options.wordIndex === playingWordIndex) {
-        setPlayingWord(null);
-      }
-      resolve();
-    };
-    utterance.onerror = () => {
-      if (options.wordIndex === playingWordIndex) {
-        setPlayingWord(null);
-      }
-      resolve();
-    };
+    utterance.onend = () => resolve();
+    utterance.onerror = () => resolve();
     window.speechSynthesis.speak(utterance);
   });
+}
+
+async function speakWord(word, options = {}) {
+  if (!word) {
+    return;
+  }
+
+  if (options.remember !== false) {
+    lastSpokenEntry = { word: { ...word } };
+  }
+  replayBtn.classList.remove("hidden");
+  if ("speechSynthesis" in window) {
+    window.speechSynthesis.cancel();
+  }
+  cancelCloudSpeech();
+
+  const englishLang = settings.englishVoicePref === "uk" ? "en-GB" : "en-US";
+
+  try {
+    if (settings.parentLearningMode) {
+      await speakText(word.en, {
+        lang: englishLang,
+        rate: settings.slowMode ? 0.74 : 0.9,
+        voiceType: "english"
+      });
+      await wait(180);
+      await speakText(`中文解释：${word.zh}`, {
+        lang: "zh-CN",
+        rate: 0.92,
+        voiceType: "chinese"
+      });
+      await wait(140);
+      await speakText(word.en, {
+        lang: englishLang,
+        rate: settings.slowMode ? 0.78 : 0.95,
+        voiceType: "english"
+      });
+    } else {
+      await speakText(word.en, {
+        lang: englishLang,
+        rate: settings.slowMode ? 0.78 : 0.95,
+        voiceType: "english"
+      });
+    }
+  } finally {
+    if (options.wordIndex === playingWordIndex) {
+      setPlayingWord(null);
+    }
+  }
 }
 
 function openSiblingCategory(direction) {
@@ -454,6 +753,12 @@ function syncSettingsUi() {
   delayInput.value = (settings.autoplayGapMs / 1000).toFixed(1);
   wordCountValue.textContent = String(settings.autoplayWordCount);
   delayValue.textContent = (settings.autoplayGapMs / 1000).toFixed(1);
+  parentLearningToggle.checked = settings.parentLearningMode;
+  englishVoiceSelect.value = settings.englishVoicePref;
+  ttsEngineSelect.value = settings.ttsEngine;
+  azureRegionInput.value = settings.azureRegion;
+  azureApiKeyInput.value = settings.azureApiKey;
+  setAutoplayButton(autoPlayBtn.classList.contains("active"));
 }
 
 function openParentMode() {
@@ -504,15 +809,41 @@ function setupParentMode() {
     delayValue.textContent = (settings.autoplayGapMs / 1000).toFixed(1);
     saveSettings();
   });
+  parentLearningToggle.addEventListener("change", () => {
+    settings.parentLearningMode = parentLearningToggle.checked;
+    setAutoplayButton(autoPlayBtn.classList.contains("active"));
+    saveSettings();
+  });
+  englishVoiceSelect.addEventListener("change", () => {
+    settings.englishVoicePref = englishVoiceSelect.value;
+    saveSettings();
+  });
+  ttsEngineSelect.addEventListener("change", () => {
+    settings.ttsEngine = ttsEngineSelect.value;
+    saveSettings();
+  });
+  azureRegionInput.addEventListener("change", () => {
+    settings.azureRegion = azureRegionInput.value.trim();
+    saveSettings();
+  });
+  azureApiKeyInput.addEventListener("change", () => {
+    settings.azureApiKey = azureApiKeyInput.value.trim();
+    saveSettings();
+  });
 }
 
 function setAutoplayButton(active) {
   autoPlayBtn.classList.toggle("active", active);
-  autoPlayBtn.textContent = active ? "停止轮播" : "自动轮播";
+  autoPlayBtn.textContent = active
+    ? "停止轮播"
+    : settings.parentLearningMode
+      ? "学习轮播"
+      : "自动轮播";
 }
 
 function stopAutoplay() {
   autoplaySessionToken += 1;
+  cancelCloudSpeech();
   if ("speechSynthesis" in window) {
     window.speechSynthesis.cancel();
   }
@@ -535,7 +866,7 @@ async function startAutoplay() {
       return;
     }
     setPlayingWord(index);
-    await speak(words[index].en, { wordIndex: index });
+    await speakWord(words[index], { wordIndex: index });
     if (mySession !== autoplaySessionToken || index === words.length - 1) {
       break;
     }
@@ -550,9 +881,9 @@ async function startAutoplay() {
 
 backBtn.addEventListener("click", goHome);
 replayBtn.addEventListener("click", () => {
-  if (lastSpokenWord) {
+  if (lastSpokenEntry?.word) {
     stopAutoplay();
-    speak(lastSpokenWord);
+    speakWord(lastSpokenEntry.word, { remember: false });
   }
 });
 autoPlayBtn.addEventListener("click", () => {

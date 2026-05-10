@@ -42,6 +42,34 @@
           <span>轮播间隔：<b id="delayValue">2.2</b> 秒</span>
           <input id="delayInput" type="range" min="1.5" max="4" step="0.1" value="2.2" />
         </label>
+        <label class="setting-item">
+          <span>家长学习模式（英->中讲解）</span>
+          <input id="parentLearningToggle" type="checkbox" />
+        </label>
+        <label class="setting-item">
+          <span>英文发音偏好</span>
+          <select id="englishVoiceSelect">
+            <option value="us">美音（推荐）</option>
+            <option value="uk">英音</option>
+            <option value="auto">自动选择</option>
+          </select>
+        </label>
+        <label class="setting-item">
+          <span>高质量云端发音</span>
+          <select id="ttsEngineSelect">
+            <option value="system">关闭（使用本机）</option>
+            <option value="azure">开启（Azure Neural）</option>
+          </select>
+        </label>
+        <label class="setting-item">
+          <span>Azure 区域（如 eastasia）</span>
+          <input id="azureRegionInput" type="text" placeholder="eastasia" />
+        </label>
+        <label class="setting-item">
+          <span>Azure Key（仅保存在本机浏览器）</span>
+          <input id="azureApiKeyInput" type="password" placeholder="请输入 Azure Speech Key" />
+        </label>
+        <p class="setting-note">开启云端后，英文将使用更清晰的神经网络语音；请求失败会自动回退到本机发音。</p>
         <button id="closeParentModalBtn" class="big-btn close-modal-btn">完成</button>
       </div>
     </div>

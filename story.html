@@ -1,0 +1,862 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#fff6dd" />
+    <title>绘本模式 · Baby English</title>
+    <style>
+      :root {
+        --bg: #fff6dd;
+        --card: #fffdf4;
+        --ink: #3f2f1f;
+        --soft: #7b674f;
+        --primary: #ffbe72;
+        --primary-dark: #f8ab52;
+        --border: #edd8b6;
+      }
+
+      * {
+        box-sizing: border-box;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      html,
+      body {
+        margin: 0;
+        min-height: 100%;
+        background: var(--bg);
+        color: var(--ink);
+        font-family: "Arial Rounded MT Bold", "PingFang SC", "Microsoft YaHei", sans-serif;
+      }
+
+      .app {
+        min-height: 100svh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .top-bar {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        background: rgba(255, 246, 221, 0.97);
+        border-bottom: 2px solid var(--border);
+        padding: 12px;
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .title-group {
+        min-width: 0;
+        text-align: center;
+      }
+
+      .title-group h1 {
+        margin: 0;
+        font-size: clamp(24px, 5vw, 34px);
+        line-height: 1.2;
+      }
+
+      .title-group p {
+        margin: 4px 0 0;
+        color: var(--soft);
+        font-size: clamp(14px, 3.2vw, 20px);
+      }
+
+      .btn {
+        border: none;
+        border-radius: 16px;
+        background: var(--primary);
+        color: #372516;
+        font-weight: 700;
+        min-height: 56px;
+        padding: 10px 14px;
+        font-size: clamp(18px, 3.5vw, 24px);
+      }
+
+      .btn:active {
+        transform: scale(0.98);
+        background: var(--primary-dark);
+      }
+
+      main {
+        padding: 14px;
+      }
+
+      .controls,
+      .story-jump,
+      .page-controls {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+        margin-bottom: 10px;
+      }
+
+      .story-jump {
+        grid-template-columns: 1fr auto;
+      }
+
+      .story-jump input,
+      .story-jump select {
+        width: 100%;
+        border: 2px solid var(--border);
+        border-radius: 14px;
+        min-height: 54px;
+        padding: 8px 10px;
+        font-size: clamp(18px, 3.4vw, 24px);
+        font-weight: 700;
+        color: var(--ink);
+        background: #fff;
+      }
+
+      .page-card {
+        border: 3px solid var(--border);
+        border-radius: 28px;
+        background: var(--card);
+        padding: 16px;
+        min-height: 60vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+      }
+
+      .page-emoji {
+        font-size: clamp(100px, 24vw, 220px);
+        line-height: 1;
+        margin-top: 8px;
+      }
+
+      .sentence-zh {
+        margin-top: 16px;
+        font-size: clamp(34px, 8vw, 56px);
+        line-height: 1.28;
+      }
+
+      .sentence-en {
+        margin-top: 16px;
+        font-size: clamp(36px, 8.5vw, 62px);
+        line-height: 1.24;
+        font-weight: 800;
+      }
+
+      .speak-btn {
+        margin-top: 12px;
+        width: 100%;
+      }
+
+      .word-gloss {
+        margin-top: 14px;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 8px;
+      }
+
+      .gloss-item {
+        border: 2px solid var(--border);
+        border-radius: 14px;
+        background: #fff8eb;
+        padding: 8px 10px;
+        font-size: clamp(16px, 3.3vw, 22px);
+      }
+
+      .page-indicator {
+        margin-top: 14px;
+        color: var(--soft);
+        font-size: clamp(16px, 3.2vw, 22px);
+      }
+
+      .hidden {
+        display: none !important;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <header class="top-bar">
+        <button id="backHomeBtn" class="btn" type="button">← 主页</button>
+        <div class="title-group">
+          <h1 id="storyTitleZh">绘本模式</h1>
+          <p id="storyTitleEn">Picture Book Mode</p>
+        </div>
+        <button id="langToggleBtn" class="btn" type="button">英文模式</button>
+      </header>
+
+      <main>
+        <section class="controls">
+          <button id="prevStoryBtn" class="btn" type="button">上一个故事</button>
+          <button id="nextStoryBtn" class="btn" type="button">下一个故事</button>
+        </section>
+
+        <section class="story-jump">
+          <select id="storySelect" aria-label="选择故事"></select>
+          <input id="storyIndexInput" type="number" min="1" max="1000" value="1" />
+        </section>
+
+        <article id="pageCard" class="page-card">
+          <div id="pageEmoji" class="page-emoji" aria-hidden="true">📖</div>
+          <div id="sentenceZh" class="sentence-zh"></div>
+          <div id="sentenceEn" class="sentence-en hidden"></div>
+          <button id="speakBtn" class="btn speak-btn hidden" type="button">🔊 朗读英文</button>
+          <div id="glossWrap" class="word-gloss hidden"></div>
+          <div id="chapterIndicator" class="page-indicator"></div>
+          <div id="pageIndicator" class="page-indicator"></div>
+        </article>
+
+        <section class="page-controls">
+          <button id="prevPageBtn" class="btn" type="button">上一页</button>
+          <button id="nextPageBtn" class="btn" type="button">下一页</button>
+        </section>
+        <section class="page-controls">
+          <button id="autoReadBtn" class="btn" type="button">连续朗读（自动下一章）</button>
+          <button id="restartReadBtn" class="btn" type="button">从第一章朗读</button>
+        </section>
+      </main>
+    </div>
+
+    <script>
+      const glossary = {
+        a: "一个",
+        all: "所有",
+        and: "和",
+        are: "是",
+        asks: "问",
+        at: "在",
+        back: "回来",
+        because: "因为",
+        big: "大的",
+        bunny: "小兔子",
+        but: "但是",
+        came: "来了",
+        caterpillar: "毛毛虫",
+        day: "白天",
+        eat: "吃",
+        falls: "落下",
+        feels: "感到",
+        finds: "找到",
+        flower: "花",
+        for: "为了",
+        from: "从",
+        gets: "变得",
+        good: "好的",
+        green: "绿色的",
+        grows: "长大",
+        happy: "开心的",
+        he: "他",
+        hello: "你好",
+        home: "家",
+        hugs: "拥抱",
+        hungry: "饿的",
+        i: "我",
+        in: "在...里面",
+        is: "是",
+        jumps: "跳",
+        leaf: "树叶",
+        little: "小小的",
+        lives: "住在",
+        looks: "看起来",
+        love: "爱",
+        moon: "月亮",
+        more: "更多",
+        morning: "早晨",
+        my: "我的",
+        nest: "巢",
+        next: "下一个",
+        night: "夜晚",
+        on: "在...上",
+        over: "在...上方",
+        page: "页",
+        play: "玩",
+        reaches: "到达",
+        red: "红色的",
+        runs: "跑",
+        says: "说",
+        sees: "看到",
+        sleeps: "睡觉",
+        small: "小的",
+        smiles: "微笑",
+        softly: "轻轻地",
+        story: "故事",
+        sun: "太阳",
+        sweet: "甜蜜的",
+        the: "这/那",
+        then: "然后",
+        to: "到",
+        today: "今天",
+        tree: "树",
+        under: "在...下面",
+        up: "向上",
+        very: "非常",
+        wakes: "醒来",
+        warm: "温暖的",
+        was: "是（过去式）",
+        we: "我们",
+        with: "和",
+        you: "你",
+        your: "你的",
+        after: "在...之后",
+        again: "再次",
+        around: "在周围",
+        basket: "篮子",
+        beach: "海滩",
+        before: "在...之前",
+        bell: "铃铛",
+        blue: "蓝色的",
+        boat: "小船",
+        bridge: "桥",
+        bring: "带来",
+        bright: "明亮的",
+        build: "建造",
+        cloud: "云",
+        cloudlet: "小云朵",
+        collects: "收集",
+        color: "颜色",
+        crosses: "穿过",
+        dark: "黑暗的",
+        deep: "深的",
+        dream: "梦想",
+        drops: "滴落",
+        easy: "容易的",
+        everyone: "每个人",
+        far: "远的",
+        field: "田野",
+        first: "首先",
+        friend: "朋友",
+        gentle: "温柔的",
+        gift: "礼物",
+        gives: "给",
+        glow: "发光",
+        goes: "去",
+        has: "有",
+        hear: "听见",
+        helps: "帮助",
+        hill: "小山",
+        hold: "握住",
+        hope: "希望",
+        house: "房子",
+        kite: "风筝",
+        lamp: "灯",
+        lane: "小路",
+        laugh: "大笑",
+        learns: "学会",
+        light: "光",
+        listens: "倾听",
+        loses: "丢失",
+        makes: "制作",
+        map: "地图",
+        meadow: "草地",
+        missing: "不见的",
+        morninglight: "晨光",
+        move: "移动",
+        near: "靠近",
+        new: "新的",
+        path: "小径",
+        pebble: "鹅卵石",
+        pond: "池塘",
+        rain: "雨",
+        rainbow: "彩虹",
+        remembers: "记得",
+        river: "河流",
+        road: "道路",
+        same: "相同的",
+        seed: "种子",
+        share: "分享",
+        shining: "闪亮的",
+        shy: "害羞的",
+        sings: "唱歌",
+        sky: "天空",
+        slow: "慢慢的",
+        sound: "声音",
+        sparkle: "闪耀",
+        star: "星星",
+        step: "脚步",
+        stop: "停止",
+        strong: "强壮的",
+        together: "一起",
+        trail: "小路",
+        tries: "尝试",
+        turn: "转弯",
+        waits: "等待",
+        water: "水",
+        way: "道路",
+        whisper: "低声说",
+        wide: "宽广的",
+        window: "窗户",
+        windy: "有风的",
+        wonder: "惊喜",
+        woods: "树林",
+        yellow: "黄色的"
+      };
+
+      function buildCoreStories() {
+        return [
+          {
+            titleZh: "好饿的毛毛虫",
+            titleEn: "The Very Hungry Caterpillar",
+            pages: [
+              {
+                emoji: "🥚🌿",
+                zh: "月亮慢慢落下，一颗小小的蛋静静躺在绿叶上。",
+                en: "As the moon goes down, a tiny egg rests on a green leaf."
+              },
+              {
+                emoji: "🐛🍎",
+                zh: "太阳升起来了，毛毛虫醒来，肚子咕噜咕噜叫。",
+                en: "The sun comes up, and the caterpillar wakes with a rumbling tummy."
+              },
+              {
+                emoji: "🐛🍎🍐🍓",
+                zh: "它先吃了苹果，又吃了梨和草莓，可还是有点饿。",
+                en: "It eats an apple, then a pear and strawberries, but it is still hungry."
+              },
+              {
+                emoji: "🐛🍰🍭🤢",
+                zh: "后来它吃得太多太快，肚子有点不舒服。",
+                en: "Later it eats too much, too fast, and its tummy feels bad."
+              },
+              {
+                emoji: "🐛🌿😌",
+                zh: "它慢慢吃一片嫩叶，觉得舒服了，还变得更壮了。",
+                en: "It eats one fresh leaf slowly, feels better, and grows stronger."
+              },
+              {
+                emoji: "🧵🐛🦋",
+                zh: "毛毛虫织好小茧，睡了好久，终于变成美丽的蝴蝶。",
+                en: "The caterpillar makes a cocoon, sleeps for days, and becomes a beautiful butterfly."
+              }
+            ]
+          },
+          {
+            titleZh: "猜猜我有多爱你",
+            titleEn: "Guess How Much I Love You",
+            pages: [
+              {
+                emoji: "🐰🌙",
+                zh: "睡觉前，小兔子拉住大兔子：猜猜我有多爱你。",
+                en: "Before bed, Little Bunny holds Big Bunny and says, guess how much I love you."
+              },
+              {
+                emoji: "🐰↔️🐰",
+                zh: "小兔子把手臂张得大大的：我爱你这么这么多。",
+                en: "Little Bunny stretches his arms wide and says, I love you this much."
+              },
+              {
+                emoji: "🐰📏🌳",
+                zh: "大兔子笑了：我爱你这么这么多，比高高的树还高。",
+                en: "Big Bunny smiles: I love you this much, higher than the tall tree."
+              },
+              {
+                emoji: "🐰🦘🛤️",
+                zh: "小兔子跳啊跳：我爱你，一直到小路的尽头。",
+                en: "Little Bunny hops and says, I love you all the way to the end of the lane."
+              },
+              {
+                emoji: "🐰😴🌌",
+                zh: "夜色变安静了，小兔子靠在大兔子怀里，慢慢睡着。",
+                en: "The night turns quiet, and Little Bunny falls asleep in Big Bunny's arms."
+              },
+              {
+                emoji: "🐰💛🌙✨",
+                zh: "大兔子轻声说：我爱你到月亮那里，再一路回来。",
+                en: "Big Bunny whispers, I love you to the moon, and all the way back."
+              }
+            ]
+          }
+        ];
+      }
+
+      function buildGeneratedStories(targetCount) {
+        const characters = [
+          { zh: "小熊", en: "Little Bear", emoji: "🐻" },
+          { zh: "小猫", en: "Little Cat", emoji: "🐱" },
+          { zh: "小狗", en: "Little Dog", emoji: "🐶" },
+          { zh: "小鸭", en: "Little Duck", emoji: "🦆" },
+          { zh: "小兔", en: "Little Bunny", emoji: "🐰" },
+          { zh: "小鹿", en: "Little Deer", emoji: "🦌" }
+        ];
+        const friends = [
+          { zh: "小鸟", en: "Little Bird", emoji: "🐦" },
+          { zh: "小松鼠", en: "Little Squirrel", emoji: "🐿️" },
+          { zh: "小青蛙", en: "Little Frog", emoji: "🐸" },
+          { zh: "小蜜蜂", en: "Little Bee", emoji: "🐝" }
+        ];
+        const places = [
+          { zh: "花园", en: "garden", emoji: "🌷" },
+          { zh: "小河边", en: "river", emoji: "🌊" },
+          { zh: "森林小路", en: "forest trail", emoji: "🌳" },
+          { zh: "风车草地", en: "windy meadow", emoji: "🌱" },
+          { zh: "彩虹山坡", en: "rainbow hill", emoji: "🌈" }
+        ];
+        const goals = [
+          { zh: "寻找会发光的小石子", en: "find a shining pebble", emoji: "🪨✨" },
+          { zh: "把迷路的风筝带回家", en: "bring a lost kite home", emoji: "🪁" },
+          { zh: "给奶奶送一篮子花", en: "bring a basket of flowers to grandma", emoji: "🧺🌼" },
+          { zh: "找到会唱歌的小溪", en: "find the singing stream", emoji: "🎵💧" },
+          { zh: "在天黑前点亮小灯", en: "light a little lamp before dark", emoji: "🏮" }
+        ];
+        const obstacles = [
+          { zh: "前面有一座摇摇晃晃的小桥", en: "a wobbly bridge is ahead", emoji: "🌉" },
+          { zh: "突然下起了细细的小雨", en: "a soft rain starts to fall", emoji: "🌧️" },
+          { zh: "地图被风吹跑了一角", en: "the map corner flies away in the wind", emoji: "🗺️💨" },
+          { zh: "路口太多，不知道往哪走", en: "there are too many turns on the road", emoji: "🛤️" }
+        ];
+        const helps = [
+          { zh: "一起听风铃的方向", en: "listen to the bell and follow the sound", emoji: "🔔" },
+          { zh: "手拉手，慢慢往前走", en: "hold hands and walk slowly", emoji: "🤝" },
+          { zh: "借着月光看清脚下的小路", en: "use moonlight to see the little path", emoji: "🌙" },
+          { zh: "用彩色石头做路标", en: "make small signs with colorful stones", emoji: "🪨🎨" }
+        ];
+        const endings = [
+          { zh: "他们终于完成了今天的小任务，心里暖暖的。", en: "They finish their little mission and feel warm inside.", emoji: "💛" },
+          { zh: "大家一起笑了，原来勇敢和陪伴最珍贵。", en: "Everyone laughs, and they learn that courage and company matter most.", emoji: "😊" },
+          { zh: "回家的路上，星星一闪一闪，像在说晚安。", en: "On the way home, the stars blink gently, as if saying good night.", emoji: "⭐" },
+          { zh: "他们把故事讲给家人听，家里充满了笑声。", en: "They tell the story to family, and the house fills with laughter.", emoji: "🏠" }
+        ];
+
+        function pickBy(index, list, shift = 0) {
+          return list[(index + shift) % list.length];
+        }
+
+        const stories = [];
+        for (let i = 3; i <= targetCount; i += 1) {
+          const idx = i - 3;
+          const character = pickBy(idx, characters, 0);
+          const friend = pickBy(idx, friends, 1);
+          const place = pickBy(idx, places, 2);
+          const goal = pickBy(idx, goals, 3);
+          const obstacle = pickBy(idx, obstacles, 4);
+          const help = pickBy(idx, helps, 5);
+          const ending = pickBy(idx, endings, 6);
+
+          stories.push({
+            titleZh: `晚安小冒险 ${i - 2}`,
+            titleEn: `Little Night Adventure ${i - 2}`,
+            pages: [
+              {
+                emoji: `${character.emoji}${place.emoji}☀️`,
+                zh: `清晨，${character.zh}和${friend.zh}来到${place.zh}，准备开始一天的探险。`,
+                en: `In the morning, ${character.en} and ${friend.en} come to the ${place.en} for a little adventure.`
+              },
+              {
+                emoji: `${character.emoji}${goal.emoji}`,
+                zh: `他们决定${goal.zh}，因为他们想帮助家人和朋友。`,
+                en: `They decide to ${goal.en}, because they want to help family and friends.`
+              },
+              {
+                emoji: `${friend.emoji}${obstacle.emoji}`,
+                zh: `走着走着，${obstacle.zh}，他们先停下来深呼吸。`,
+                en: `As they walk, ${obstacle.en}, so they stop and take a deep breath.`
+              },
+              {
+                emoji: `${character.emoji}${friend.emoji}${pickBy(idx, helps, 5).emoji}`,
+                zh: `${character.zh}说：别着急，我们可以${help.zh}。`,
+                en: `${character.en} says, do not worry, we can ${help.en}.`
+              },
+              {
+                emoji: `${goal.emoji}✨`,
+                zh: `他们互相鼓励，终于做到了，眼睛里亮晶晶的。`,
+                en: `They cheer each other on and finally make it, with bright sparkles in their eyes.`
+              },
+              {
+                emoji: `${character.emoji}${friend.emoji}${ending.emoji}🌙`,
+                zh: `${ending.zh}`,
+                en: `${ending.en}`
+              }
+            ]
+          });
+        }
+        return stories;
+      }
+
+      function buildStories() {
+        const coreStories = buildCoreStories();
+        const generated = buildGeneratedStories(1000);
+        return [...coreStories, ...generated];
+      }
+
+      function tokenizeEnglishSentence(sentence) {
+        return sentence
+          .toLowerCase()
+          .replace(/[^a-z'\s]/g, " ")
+          .split(/\s+/)
+          .filter(Boolean);
+      }
+
+      function explainWords(sentence) {
+        const words = tokenizeEnglishSentence(sentence);
+        const unique = [];
+        const seen = new Set();
+        words.forEach((word) => {
+          if (!seen.has(word)) {
+            seen.add(word);
+            unique.push(word);
+          }
+        });
+        return unique.map((word) => ({
+          word,
+          zh: glossary[word] || "释义补充中"
+        }));
+      }
+
+      function pickEnglishVoice() {
+        const voices = speechSynthesis.getVoices();
+        const english = voices.filter((voice) => voice.lang.toLowerCase().startsWith("en"));
+        if (english.length === 0) {
+          return null;
+        }
+        return (
+          english.find((voice) => voice.lang.toLowerCase().startsWith("en-us")) ||
+          english.find((voice) => voice.lang.toLowerCase().startsWith("en-gb")) ||
+          english[0]
+        );
+      }
+
+      function speakEnglish(text) {
+        return speakSentence(text, "en");
+      }
+
+      function pickChineseVoice() {
+        const voices = speechSynthesis.getVoices();
+        const chinese = voices.filter((voice) => voice.lang.toLowerCase().startsWith("zh"));
+        if (chinese.length === 0) {
+          return null;
+        }
+        return chinese.find((voice) => voice.lang.toLowerCase().startsWith("zh-cn")) || chinese[0];
+      }
+
+      function speakSentence(text, language) {
+        if (!("speechSynthesis" in window)) {
+          return Promise.resolve();
+        }
+        const lang = language === "zh" ? "zh-CN" : "en-US";
+        const rate = language === "zh" ? 0.9 : 0.86;
+
+        speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = lang;
+        utterance.rate = rate;
+        utterance.pitch = 1;
+        const voice = language === "zh" ? pickChineseVoice() : pickEnglishVoice();
+        if (voice) {
+          utterance.voice = voice;
+        }
+        return new Promise((resolve) => {
+          utterance.onend = () => resolve();
+          utterance.onerror = () => resolve();
+          speechSynthesis.speak(utterance);
+        });
+      }
+
+      const state = {
+        language: "zh",
+        storyIndex: 0,
+        pageIndex: 0,
+        stories: buildStories(),
+        autoReadToken: 0
+      };
+
+      const backHomeBtn = document.getElementById("backHomeBtn");
+      const langToggleBtn = document.getElementById("langToggleBtn");
+      const prevStoryBtn = document.getElementById("prevStoryBtn");
+      const nextStoryBtn = document.getElementById("nextStoryBtn");
+      const storySelect = document.getElementById("storySelect");
+      const storyIndexInput = document.getElementById("storyIndexInput");
+      const pageEmoji = document.getElementById("pageEmoji");
+      const sentenceZh = document.getElementById("sentenceZh");
+      const sentenceEn = document.getElementById("sentenceEn");
+      const speakBtn = document.getElementById("speakBtn");
+      const glossWrap = document.getElementById("glossWrap");
+      const chapterIndicator = document.getElementById("chapterIndicator");
+      const pageIndicator = document.getElementById("pageIndicator");
+      const prevPageBtn = document.getElementById("prevPageBtn");
+      const nextPageBtn = document.getElementById("nextPageBtn");
+      const autoReadBtn = document.getElementById("autoReadBtn");
+      const restartReadBtn = document.getElementById("restartReadBtn");
+      const storyTitleZh = document.getElementById("storyTitleZh");
+      const storyTitleEn = document.getElementById("storyTitleEn");
+      const pageCard = document.getElementById("pageCard");
+      let isAutoReading = false;
+
+      function buildStorySelectOptions() {
+        const options = state.stories.map((story, index) => {
+          const text = `${index + 1}. ${story.titleZh}`;
+          return `<option value="${index}">${text}</option>`;
+        });
+        storySelect.innerHTML = options.join("");
+      }
+
+      function getCurrentStory() {
+        return state.stories[state.storyIndex];
+      }
+
+      function getCurrentPage() {
+        return getCurrentStory().pages[state.pageIndex];
+      }
+
+      function renderGloss(sentence) {
+        const explained = explainWords(sentence);
+        glossWrap.innerHTML = explained
+          .map((item) => `<span class="gloss-item">${item.word} → ${item.zh}</span>`)
+          .join("");
+      }
+
+      function render() {
+        const story = getCurrentStory();
+        const page = getCurrentPage();
+
+        storyTitleZh.textContent = story.titleZh;
+        storyTitleEn.textContent = story.titleEn;
+        storySelect.value = String(state.storyIndex);
+        storyIndexInput.value = String(state.storyIndex + 1);
+
+        pageEmoji.textContent = page.emoji;
+        sentenceZh.textContent = page.zh;
+        sentenceEn.textContent = page.en;
+        chapterIndicator.textContent = `第 ${state.storyIndex + 1} 章 · ${story.titleZh}`;
+
+        if (state.language === "en") {
+          langToggleBtn.textContent = "中文模式";
+          sentenceZh.classList.add("hidden");
+          sentenceEn.classList.remove("hidden");
+          speakBtn.classList.remove("hidden");
+          glossWrap.classList.remove("hidden");
+          renderGloss(page.en);
+        } else {
+          langToggleBtn.textContent = "英文模式";
+          sentenceZh.classList.remove("hidden");
+          sentenceEn.classList.add("hidden");
+          speakBtn.classList.add("hidden");
+          glossWrap.classList.add("hidden");
+        }
+
+        pageIndicator.textContent = `故事 ${state.storyIndex + 1}/${state.stories.length} · 第 ${
+          state.pageIndex + 1
+        }/${story.pages.length} 页`;
+      }
+
+      function setAutoReadButton(active) {
+        isAutoReading = active;
+        autoReadBtn.textContent = active ? "停止连续朗读" : "连续朗读（自动下一章）";
+      }
+
+      function stopAutoRead() {
+        state.autoReadToken += 1;
+        setAutoReadButton(false);
+        if ("speechSynthesis" in window) {
+          speechSynthesis.cancel();
+        }
+      }
+
+      function changeStory(nextIndex) {
+        stopAutoRead();
+        const max = state.stories.length - 1;
+        const safeIndex = Math.max(0, Math.min(max, nextIndex));
+        state.storyIndex = safeIndex;
+        state.pageIndex = 0;
+        render();
+      }
+
+      function changePage(delta) {
+        stopAutoRead();
+        const story = getCurrentStory();
+        const next = state.pageIndex + delta;
+        if (next < 0 || next >= story.pages.length) {
+          return;
+        }
+        state.pageIndex = next;
+        render();
+      }
+
+      let touchStartX = null;
+      pageCard.addEventListener("touchstart", (event) => {
+        touchStartX = event.changedTouches[0].clientX;
+      });
+      pageCard.addEventListener("touchend", (event) => {
+        if (touchStartX === null) {
+          return;
+        }
+        const delta = event.changedTouches[0].clientX - touchStartX;
+        touchStartX = null;
+        if (Math.abs(delta) < 45) {
+          return;
+        }
+        if (delta < 0) {
+          changePage(1);
+        } else {
+          changePage(-1);
+        }
+      });
+
+      backHomeBtn.addEventListener("click", () => {
+        stopAutoRead();
+        window.location.href = "./index.html";
+      });
+      langToggleBtn.addEventListener("click", () => {
+        stopAutoRead();
+        state.language = state.language === "zh" ? "en" : "zh";
+        render();
+      });
+      prevStoryBtn.addEventListener("click", () => changeStory(state.storyIndex - 1));
+      nextStoryBtn.addEventListener("click", () => changeStory(state.storyIndex + 1));
+      storySelect.addEventListener("change", () => changeStory(Number(storySelect.value)));
+      storyIndexInput.addEventListener("change", () => {
+        const index = Number(storyIndexInput.value) - 1;
+        if (!Number.isFinite(index)) {
+          return;
+        }
+        changeStory(index);
+      });
+      prevPageBtn.addEventListener("click", () => changePage(-1));
+      nextPageBtn.addEventListener("click", () => changePage(1));
+      speakBtn.addEventListener("click", () => {
+        const page = getCurrentPage();
+        speakEnglish(page.en);
+      });
+      autoReadBtn.addEventListener("click", async () => {
+        if (isAutoReading) {
+          stopAutoRead();
+          return;
+        }
+        const token = state.autoReadToken + 1;
+        state.autoReadToken = token;
+        setAutoReadButton(true);
+        for (let storyIndex = state.storyIndex; storyIndex < state.stories.length; storyIndex += 1) {
+          const startPage = storyIndex === state.storyIndex ? state.pageIndex : 0;
+          const story = state.stories[storyIndex];
+          for (let pageIndex = startPage; pageIndex < story.pages.length; pageIndex += 1) {
+            if (token !== state.autoReadToken) {
+              return;
+            }
+            state.storyIndex = storyIndex;
+            state.pageIndex = pageIndex;
+            render();
+            const current = getCurrentPage();
+            const sentence = state.language === "zh" ? current.zh : current.en;
+            await speakSentence(sentence, state.language);
+            if (token !== state.autoReadToken) {
+              return;
+            }
+            await new Promise((resolve) => window.setTimeout(resolve, 280));
+          }
+        }
+        if (token === state.autoReadToken) {
+          setAutoReadButton(false);
+        }
+      });
+      restartReadBtn.addEventListener("click", async () => {
+        stopAutoRead();
+        state.storyIndex = 0;
+        state.pageIndex = 0;
+        render();
+        autoReadBtn.click();
+      });
+
+      buildStorySelectOptions();
+      render();
+    </script>
+  </body>
+</html>

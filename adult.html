@@ -1,0 +1,1214 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#fff5e8" />
+    <title>大人口语模式 · Baby English</title>
+    <style>
+      :root {
+        --bg: #fff5e8;
+        --card: #fffdf8;
+        --ink: #3d2d1f;
+        --soft: #7b6352;
+        --primary: #ffbd78;
+        --primary-dark: #f4a85b;
+        --border: #edd4b6;
+        --good: #2f8a53;
+      }
+
+      * {
+        box-sizing: border-box;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      html,
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font-family: "Arial Rounded MT Bold", "PingFang SC", "Microsoft YaHei", sans-serif;
+      }
+
+      .app {
+        min-height: 100svh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .top {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        background: rgba(255, 245, 232, 0.97);
+        border-bottom: 2px solid var(--border);
+        padding: 12px;
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        gap: 10px;
+        align-items: center;
+      }
+
+      .title {
+        text-align: center;
+      }
+
+      .title h1 {
+        margin: 0;
+        font-size: clamp(24px, 5vw, 34px);
+      }
+
+      .title p {
+        margin: 3px 0 0;
+        color: var(--soft);
+        font-size: clamp(14px, 3.2vw, 20px);
+      }
+
+      .btn {
+        border: none;
+        border-radius: 16px;
+        min-height: 56px;
+        padding: 10px 14px;
+        background: var(--primary);
+        color: #352313;
+        font-size: clamp(18px, 3.7vw, 24px);
+        font-weight: 700;
+      }
+
+      .btn:active {
+        transform: scale(0.98);
+        background: var(--primary-dark);
+      }
+
+      .btn.secondary {
+        background: #ffe1bf;
+      }
+
+      .btn.good {
+        background: #caefdb;
+        color: #1e5534;
+      }
+
+      .btn.active {
+        background: #ffc98f;
+      }
+
+      main {
+        padding: 12px;
+      }
+
+      .grid2 {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+        margin-bottom: 10px;
+      }
+
+      .stats {
+        border: 2px solid var(--border);
+        border-radius: 20px;
+        background: var(--card);
+        padding: 12px;
+        margin-bottom: 10px;
+      }
+
+      .stats p {
+        margin: 4px 0;
+        font-size: clamp(16px, 3.3vw, 22px);
+      }
+
+      .lesson-card {
+        border: 3px solid var(--border);
+        border-radius: 22px;
+        background: var(--card);
+        padding: 14px;
+      }
+
+      .lesson-topic {
+        font-size: clamp(22px, 4.4vw, 30px);
+        font-weight: 800;
+        text-align: center;
+      }
+
+      .line-en {
+        margin-top: 12px;
+        font-size: clamp(34px, 7.4vw, 54px);
+        line-height: 1.24;
+        text-align: center;
+        font-weight: 800;
+      }
+
+      .line-zh {
+        margin-top: 10px;
+        font-size: clamp(23px, 4.8vw, 34px);
+        color: var(--soft);
+        text-align: center;
+      }
+
+      .helper-text {
+        margin-top: 8px;
+        text-align: center;
+        font-size: clamp(16px, 3.2vw, 20px);
+        color: var(--soft);
+      }
+
+      .speech-box {
+        margin-top: 10px;
+        border: 2px dashed var(--border);
+        border-radius: 16px;
+        padding: 10px;
+        background: #fff8ef;
+      }
+
+      .speech-box p {
+        margin: 6px 0;
+        font-size: clamp(16px, 3.2vw, 20px);
+      }
+
+      .score-good {
+        color: var(--good);
+      }
+
+      .drill {
+        margin-top: 10px;
+        border: 2px solid var(--border);
+        border-radius: 16px;
+        padding: 10px;
+        background: #fff9f0;
+      }
+
+      .drill p {
+        margin: 5px 0;
+        font-size: clamp(16px, 3.2vw, 20px);
+      }
+
+      .panel {
+        margin-bottom: 10px;
+        border: 2px solid var(--border);
+        border-radius: 20px;
+        background: var(--card);
+        padding: 12px;
+      }
+
+      .panel h3 {
+        margin: 0 0 8px;
+        font-size: clamp(20px, 4.2vw, 28px);
+      }
+
+      .panel p {
+        margin: 5px 0;
+        font-size: clamp(15px, 3.1vw, 20px);
+      }
+
+      .panel select,
+      .panel input {
+        width: 100%;
+        min-height: 46px;
+        border: 2px solid var(--border);
+        border-radius: 12px;
+        padding: 6px 10px;
+        font-size: clamp(15px, 3.1vw, 20px);
+        background: #fff;
+        color: var(--ink);
+        margin-top: 6px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <header class="top">
+        <button id="homeBtn" class="btn" type="button">← 主页</button>
+        <div class="title">
+          <h1>大人口语模式</h1>
+          <p>听得懂 · 说得出 · 车上也能练</p>
+        </div>
+        <button id="modeBtn" class="btn secondary" type="button">车载听练</button>
+      </header>
+
+      <main>
+        <section class="stats">
+          <p id="levelText">Level: L1</p>
+          <p id="streakText">连续学习: 0 天</p>
+          <p id="accuracyText">近况正确率: 0%</p>
+          <p id="upgradeHint">升级条件：连续 3 天 + 正确率 >= 80%</p>
+        </section>
+
+        <section class="panel">
+          <h3>每日 15 分钟计划</h3>
+          <p id="dailyPlanText">今日听练进度：0 / 15 分钟</p>
+          <p id="dailyPlanHint">建议在车上至少完成 15 分钟连续听练。</p>
+          <section class="grid2" style="margin-bottom: 0;">
+            <button id="startDailyPlanBtn" class="btn" type="button">开始今日计划</button>
+            <button id="stopDailyPlanBtn" class="btn secondary" type="button">停止计划</button>
+          </section>
+        </section>
+
+        <section class="panel">
+          <h3>错句优先复习</h3>
+          <p id="reviewCountText">待复习：0 句</p>
+          <p id="reviewSentenceText">暂无错句，继续开口练习吧。</p>
+          <section class="grid2" style="margin-bottom: 0;">
+            <button id="reviewPlayBtn" class="btn secondary" type="button">🔊 听这句</button>
+            <button id="reviewLocateBtn" class="btn secondary" type="button">定位到课程</button>
+          </section>
+          <section class="grid2" style="margin-top: 10px; margin-bottom: 0;">
+            <button id="reviewNextBtn" class="btn secondary" type="button">下一条错句</button>
+            <button id="reviewDoneBtn" class="btn good" type="button">这句已掌握</button>
+          </section>
+        </section>
+
+        <section class="panel">
+          <h3>发音设置（iPad 优化）</h3>
+          <p>英文声线</p>
+          <select id="voicePresetSelect">
+            <option value="us_female">美音女声</option>
+            <option value="us_male">美音男声</option>
+            <option value="uk_female">英音女声</option>
+            <option value="auto">自动选择</option>
+          </select>
+          <section class="grid2" style="margin-top: 8px; margin-bottom: 0;">
+            <button id="testVoiceBtn" class="btn secondary" type="button">试听英文声音</button>
+            <button id="saveVoiceBtn" class="btn good" type="button">保存发音设置</button>
+          </section>
+          <p id="voiceTipText">免费方案：iPad 设置 -> 辅助功能 -> 朗读内容 -> 声音（English）下载增强语音，听感会更自然。</p>
+        </section>
+
+        <section class="grid2">
+          <button id="prevUnitBtn" class="btn secondary" type="button">上一课</button>
+          <button id="nextUnitBtn" class="btn secondary" type="button">下一课</button>
+        </section>
+
+        <article class="lesson-card">
+          <div id="topicText" class="lesson-topic"></div>
+          <div id="lineEn" class="line-en"></div>
+          <div id="lineZh" class="line-zh"></div>
+          <div id="lineInfo" class="helper-text"></div>
+
+          <section class="grid2" style="margin-top: 10px;">
+            <button id="speakEnBtn" class="btn" type="button">🔊 英文</button>
+            <button id="speakZhBtn" class="btn secondary" type="button">🔊 中文</button>
+          </section>
+          <section class="grid2">
+            <button id="prevLineBtn" class="btn secondary" type="button">上一句</button>
+            <button id="nextLineBtn" class="btn secondary" type="button">下一句</button>
+          </section>
+          <section class="grid2">
+            <button id="autoPlayBtn" class="btn" type="button">连续听练</button>
+            <button id="restartAutoBtn" class="btn secondary" type="button">从本课开头听</button>
+          </section>
+          <section class="grid2">
+            <button id="levelAutoBtn" class="btn secondary" type="button">整级连续播放</button>
+            <button id="unitAutoBtn" class="btn secondary" type="button">仅本课循环</button>
+          </section>
+
+          <div id="speakTrainWrap" class="speech-box">
+            <p><strong>跟读训练</strong></p>
+            <p id="recStatus">点击“开始跟读”，说出英文句子。</p>
+            <section class="grid2" style="margin-bottom: 0;">
+              <button id="startRecBtn" class="btn" type="button">🎤 开始跟读</button>
+              <button id="markDoneBtn" class="btn good" type="button">我会说这句了</button>
+            </section>
+            <p id="recResult"></p>
+            <p id="recScore"></p>
+          </div>
+
+          <div class="drill">
+            <p><strong>替换练习（开口更快）</strong></p>
+            <p id="drillPrompt"></p>
+            <p id="drillSentence" class="score-good"></p>
+            <section class="grid2" style="margin-bottom: 0;">
+              <button id="newDrillBtn" class="btn secondary" type="button">换一题</button>
+              <button id="playDrillBtn" class="btn" type="button">🔊 读这句</button>
+            </section>
+          </div>
+        </article>
+      </main>
+    </div>
+
+    <script>
+      const PROGRESS_KEY = "adult_speaking_progress_v1";
+      const dayKey = () => {
+        const now = new Date();
+        return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(
+          now.getDate()
+        ).padStart(2, "0")}`;
+      };
+
+      const seedLevels = [
+        {
+          id: "L1",
+          title: "生存口语",
+          units: [
+            {
+              topicZh: "打招呼",
+              topicEn: "Greetings",
+              lines: [
+                { en: "Hi, how are you today?", zh: "嗨，你今天怎么样？" },
+                { en: "I am fine, thank you.", zh: "我很好，谢谢你。" },
+                { en: "Nice to meet you.", zh: "很高兴见到你。" },
+                { en: "See you later.", zh: "待会见。" }
+              ]
+            },
+            {
+              topicZh: "咖啡店",
+              topicEn: "Coffee Shop",
+              lines: [
+                { en: "I would like a cup of coffee.", zh: "我想要一杯咖啡。" },
+                { en: "Can I have less sugar?", zh: "可以少糖吗？" },
+                { en: "For here or to go?", zh: "在这喝还是带走？" },
+                { en: "To go, please.", zh: "带走，谢谢。" }
+              ]
+            },
+            {
+              topicZh: "打车",
+              topicEn: "Taking a Taxi",
+              lines: [
+                { en: "Could you take me to the station?", zh: "你可以带我去车站吗？" },
+                { en: "How long will it take?", zh: "大概需要多久？" },
+                { en: "Please stop here.", zh: "请在这里停。" },
+                { en: "Keep the change.", zh: "零钱不用找了。" }
+              ]
+            }
+          ]
+        },
+        {
+          id: "L2",
+          title: "高频日常",
+          units: [
+            {
+              topicZh: "超市购物",
+              topicEn: "Shopping",
+              lines: [
+                { en: "Where can I find milk?", zh: "我在哪里能找到牛奶？" },
+                { en: "Do you have a cheaper one?", zh: "有更便宜一点的吗？" },
+                { en: "I will take this one.", zh: "我要这个。" },
+                { en: "Can I pay by card?", zh: "我可以刷卡吗？" }
+              ]
+            },
+            {
+              topicZh: "日常安排",
+              topicEn: "Daily Plans",
+              lines: [
+                { en: "I need to finish this today.", zh: "我今天得把这个完成。" },
+                { en: "Can we talk after lunch?", zh: "我们午饭后再聊可以吗？" },
+                { en: "I will call you tonight.", zh: "我今晚给你打电话。" },
+                { en: "Let us make a simple plan.", zh: "我们做个简单计划吧。" }
+              ]
+            },
+            {
+              topicZh: "家庭沟通",
+              topicEn: "Family Talk",
+              lines: [
+                { en: "I will be home before eight.", zh: "我八点前回家。" },
+                { en: "Please wait for me.", zh: "请等我一下。" },
+                { en: "Let us eat together tonight.", zh: "今晚我们一起吃饭吧。" },
+                { en: "Thank you for your help.", zh: "谢谢你的帮助。" }
+              ]
+            }
+          ]
+        },
+        {
+          id: "L3",
+          title: "连续表达",
+          units: [
+            {
+              topicZh: "讲今天发生的事",
+              topicEn: "Talk About Today",
+              lines: [
+                { en: "Today was busy but meaningful.", zh: "今天很忙，但很有意义。" },
+                { en: "I solved one difficult problem.", zh: "我解决了一个难题。" },
+                { en: "I learned a new phrase at lunch.", zh: "我午饭时学了一个新短语。" },
+                { en: "I feel more confident now.", zh: "我现在更有信心了。" },
+                { en: "Tomorrow I will practice again.", zh: "明天我会继续练习。" }
+              ]
+            },
+            {
+              topicZh: "讲一个小故事",
+              topicEn: "Tell a Short Story",
+              lines: [
+                { en: "This morning I missed my bus.", zh: "今天早上我错过了公交。" },
+                { en: "I felt nervous for a minute.", zh: "我紧张了一会儿。" },
+                { en: "Then I took a taxi and arrived on time.", zh: "然后我打车并准时到了。" },
+                { en: "My teammate smiled and helped me.", zh: "我的同事笑着帮了我。" },
+                { en: "In the end, everything was fine.", zh: "最后一切都很好。" }
+              ]
+            }
+          ]
+        },
+        {
+          id: "L4",
+          title: "情景对话",
+          units: [
+            {
+              topicZh: "酒店入住",
+              topicEn: "Hotel Check-in",
+              lines: [
+                { en: "I have a booking under Chen.", zh: "我有一笔陈姓预订。" },
+                { en: "Could I check in early?", zh: "我可以提前入住吗？" },
+                { en: "Is breakfast included?", zh: "包含早餐吗？" },
+                { en: "Could you call me a taxi at seven?", zh: "你可以七点帮我叫车吗？" }
+              ]
+            },
+            {
+              topicZh: "会议沟通",
+              topicEn: "Meeting Talk",
+              lines: [
+                { en: "Let me share a quick update.", zh: "我快速同步一下进展。" },
+                { en: "We are on track for this week.", zh: "我们本周进度正常。" },
+                { en: "The main risk is delivery time.", zh: "主要风险是交付时间。" },
+                { en: "Could we confirm the next step?", zh: "我们可以确认下一步吗？" }
+              ]
+            }
+          ]
+        }
+      ];
+
+      const targetUnitCountByLevel = {
+        L1: 18,
+        L2: 18,
+        L3: 14,
+        L4: 14
+      };
+
+      function buildGeneratedUnit(levelId, index) {
+        if (levelId === "L1") {
+          const scenes = [
+            ["便利店", "Convenience Store", "water", "矿泉水"],
+            ["面包店", "Bakery", "bread", "面包"],
+            ["药店", "Pharmacy", "medicine", "药"],
+            ["地铁站", "Subway", "ticket", "车票"],
+            ["餐厅", "Restaurant", "noodles", "面条"],
+            ["停车场", "Parking", "car", "车"],
+            ["机场", "Airport", "boarding gate", "登机口"],
+            ["咖啡馆", "Cafe", "sandwich", "三明治"],
+            ["公园", "Park", "map", "地图"],
+            ["商场", "Mall", "restroom", "洗手间"],
+            ["书店", "Bookstore", "book", "书"],
+            ["酒店前台", "Hotel Desk", "room key", "房卡"]
+          ];
+          const scene = scenes[index % scenes.length];
+          const orderNo = index + 1;
+          return {
+            topicZh: `${scene[0]}口语 ${orderNo}`,
+            topicEn: `${scene[1]} Practice ${orderNo}`,
+            lines: [
+              { en: `Excuse me, where is the ${scene[2]}?`, zh: `打扰一下，${scene[3]}在哪里？` },
+              { en: `I would like one ${scene[2]}, please.`, zh: `我想要一个${scene[3]}。` },
+              { en: "Can I pay by card?", zh: "我可以刷卡吗？" },
+              { en: "Thank you, have a nice day.", zh: "谢谢，祝你有美好的一天。" }
+            ]
+          };
+        }
+
+        if (levelId === "L2") {
+          const topics = [
+            ["通勤安排", "Commute Plan", "bus", "公交车", "office", "公司"],
+            ["电话沟通", "Phone Call", "call", "电话", "meeting", "会议"],
+            ["家庭计划", "Family Plan", "dinner", "晚饭", "home", "家里"],
+            ["健身运动", "Workout", "gym", "健身房", "tonight", "今晚"],
+            ["医院挂号", "Clinic Visit", "appointment", "预约", "doctor", "医生"],
+            ["网购售后", "Online Shopping", "order", "订单", "refund", "退款"],
+            ["同事协作", "Work Collaboration", "task", "任务", "deadline", "截止时间"],
+            ["周末安排", "Weekend Plan", "trip", "出行", "Sunday", "周日"],
+            ["孩子接送", "School Pickup", "school", "学校", "five", "五点"]
+          ];
+          const t = topics[index % topics.length];
+          const orderNo = index + 1;
+          return {
+            topicZh: `${t[0]} ${orderNo}`,
+            topicEn: `${t[1]} ${orderNo}`,
+            lines: [
+              { en: `I need to confirm the ${t[2]} plan.`, zh: `我需要确认${t[3]}安排。` },
+              { en: `Can we talk about it after lunch?`, zh: "我们午饭后聊这个可以吗？" },
+              { en: `I will send you an update before ${t[4]}.`, zh: `我会在${t[5]}前给你更新。` },
+              { en: "Please let me know if anything changes.", zh: "如果有变化请告诉我。" }
+            ]
+          };
+        }
+
+        if (levelId === "L3") {
+          const stories = [
+            ["一次迟到经历", "A Late Arrival", "bus", "公交", "taxi", "出租车"],
+            ["一次小成功", "A Small Win", "report", "报告", "team", "团队"],
+            ["一次旅行准备", "Trip Preparation", "hotel", "酒店", "passport", "护照"],
+            ["一次家庭活动", "Family Activity", "park", "公园", "picnic", "野餐"],
+            ["一次学习复盘", "Study Review", "sentence", "句子", "practice", "练习"]
+          ];
+          const s = stories[index % stories.length];
+          const orderNo = index + 1;
+          return {
+            topicZh: `${s[0]} ${orderNo}`,
+            topicEn: `${s[1]} ${orderNo}`,
+            lines: [
+              { en: `Yesterday I had to change my ${s[2]} plan.`, zh: `昨天我不得不调整${s[3]}计划。` },
+              { en: `At first, I felt a little nervous.`, zh: "一开始我有点紧张。" },
+              { en: `Then I tried another way and it worked.`, zh: "后来我尝试了另一种方法，结果成功了。" },
+              { en: `This experience helped me trust myself more.`, zh: "这次经历让我更相信自己。" },
+              { en: "Next time, I will prepare better and keep practicing.", zh: `下次我会准备更好，并继续${s[5]}。` }
+            ]
+          };
+        }
+
+        const dialogs = [
+          ["机场值机", "Airport Check-in", "boarding pass", "登机牌"],
+          ["酒店投诉", "Hotel Request", "air conditioner", "空调"],
+          ["商务会议", "Business Meeting", "timeline", "时间线"],
+          ["客户电话", "Client Call", "proposal", "方案"],
+          ["售后沟通", "After-sales Talk", "replacement", "更换"],
+          ["跨部门协作", "Cross-team Sync", "priority", "优先级"]
+        ];
+        const d = dialogs[index % dialogs.length];
+        const orderNo = index + 1;
+        return {
+          topicZh: `${d[0]} ${orderNo}`,
+          topicEn: `${d[1]} ${orderNo}`,
+          lines: [
+            { en: `I would like to confirm my ${d[2]}.`, zh: `我想确认一下我的${d[3]}。` },
+            { en: "Could you help me solve this issue today?", zh: "你今天可以帮我解决这个问题吗？" },
+            { en: "I understand, and I appreciate your support.", zh: "我明白，也感谢你的支持。" },
+            { en: "Let us agree on the next step right now.", zh: "我们现在把下一步确认下来吧。" }
+          ]
+        };
+      }
+
+      function expandLevels(baseLevels) {
+        return baseLevels.map((level) => {
+          const targetCount = targetUnitCountByLevel[level.id] || level.units.length;
+          if (level.units.length >= targetCount) {
+            return level;
+          }
+          const expandedUnits = level.units.slice();
+          while (expandedUnits.length < targetCount) {
+            expandedUnits.push(buildGeneratedUnit(level.id, expandedUnits.length - level.units.length));
+          }
+          return {
+            ...level,
+            units: expandedUnits
+          };
+        });
+      }
+
+      const levels = expandLevels(seedLevels);
+
+      const drillPairs = [
+        { from: "coffee", to: "tea", zh: "coffee->tea" },
+        { from: "station", to: "airport", zh: "station->airport" },
+        { from: "today", to: "tomorrow", zh: "today->tomorrow" },
+        { from: "taxi", to: "bus", zh: "taxi->bus" },
+        { from: "lunch", to: "dinner", zh: "lunch->dinner" },
+        { from: "home", to: "office", zh: "home->office" }
+      ];
+
+      const state = {
+        mode: "car",
+        levelIndex: 0,
+        unitIndex: 0,
+        lineIndex: 0,
+        autoToken: 0,
+        autoPlaying: false,
+        progress: loadProgress(),
+        currentDrillSentence: "",
+        reviewIndex: 0,
+        currentAutoScope: "unit"
+      };
+
+      const homeBtn = document.getElementById("homeBtn");
+      const modeBtn = document.getElementById("modeBtn");
+      const levelText = document.getElementById("levelText");
+      const streakText = document.getElementById("streakText");
+      const accuracyText = document.getElementById("accuracyText");
+      const upgradeHint = document.getElementById("upgradeHint");
+      const dailyPlanText = document.getElementById("dailyPlanText");
+      const dailyPlanHint = document.getElementById("dailyPlanHint");
+      const startDailyPlanBtn = document.getElementById("startDailyPlanBtn");
+      const stopDailyPlanBtn = document.getElementById("stopDailyPlanBtn");
+      const reviewCountText = document.getElementById("reviewCountText");
+      const reviewSentenceText = document.getElementById("reviewSentenceText");
+      const reviewPlayBtn = document.getElementById("reviewPlayBtn");
+      const reviewLocateBtn = document.getElementById("reviewLocateBtn");
+      const reviewNextBtn = document.getElementById("reviewNextBtn");
+      const reviewDoneBtn = document.getElementById("reviewDoneBtn");
+      const voicePresetSelect = document.getElementById("voicePresetSelect");
+      const testVoiceBtn = document.getElementById("testVoiceBtn");
+      const saveVoiceBtn = document.getElementById("saveVoiceBtn");
+      const voiceTipText = document.getElementById("voiceTipText");
+      const prevUnitBtn = document.getElementById("prevUnitBtn");
+      const nextUnitBtn = document.getElementById("nextUnitBtn");
+      const topicText = document.getElementById("topicText");
+      const lineEn = document.getElementById("lineEn");
+      const lineZh = document.getElementById("lineZh");
+      const lineInfo = document.getElementById("lineInfo");
+      const speakEnBtn = document.getElementById("speakEnBtn");
+      const speakZhBtn = document.getElementById("speakZhBtn");
+      const prevLineBtn = document.getElementById("prevLineBtn");
+      const nextLineBtn = document.getElementById("nextLineBtn");
+      const autoPlayBtn = document.getElementById("autoPlayBtn");
+      const restartAutoBtn = document.getElementById("restartAutoBtn");
+      const levelAutoBtn = document.getElementById("levelAutoBtn");
+      const unitAutoBtn = document.getElementById("unitAutoBtn");
+      const recStatus = document.getElementById("recStatus");
+      const recResult = document.getElementById("recResult");
+      const recScore = document.getElementById("recScore");
+      const startRecBtn = document.getElementById("startRecBtn");
+      const markDoneBtn = document.getElementById("markDoneBtn");
+      const drillPrompt = document.getElementById("drillPrompt");
+      const drillSentence = document.getElementById("drillSentence");
+      const newDrillBtn = document.getElementById("newDrillBtn");
+      const playDrillBtn = document.getElementById("playDrillBtn");
+
+      function loadProgress() {
+        try {
+          const raw = localStorage.getItem(PROGRESS_KEY);
+          if (!raw) {
+            return {
+              streakDays: 0,
+              lastDay: "",
+              attempts: 0,
+              successes: 0,
+              mastered: {},
+              reviewQueue: [],
+              dailySeconds: {},
+              voicePreset: "us_female"
+            };
+          }
+          const parsed = JSON.parse(raw);
+          const normalizedQueue = Array.isArray(parsed.reviewQueue)
+            ? parsed.reviewQueue
+                .map((item) => {
+                  if (typeof item === "string") {
+                    return { en: item, zh: "中文释义待补充" };
+                  }
+                  if (item && item.en) {
+                    return item;
+                  }
+                  return null;
+                })
+                .filter(Boolean)
+            : [];
+          return {
+            streakDays: parsed.streakDays || 0,
+            lastDay: parsed.lastDay || "",
+            attempts: parsed.attempts || 0,
+            successes: parsed.successes || 0,
+            mastered: parsed.mastered || {},
+            reviewQueue: normalizedQueue,
+            dailySeconds: parsed.dailySeconds || {},
+            voicePreset: parsed.voicePreset || "us_female"
+          };
+        } catch {
+          return {
+            streakDays: 0,
+            lastDay: "",
+            attempts: 0,
+            successes: 0,
+            mastered: {},
+            reviewQueue: [],
+            dailySeconds: {},
+            voicePreset: "us_female"
+          };
+        }
+      }
+
+      function saveProgress() {
+        localStorage.setItem(PROGRESS_KEY, JSON.stringify(state.progress));
+      }
+
+      function getCurrentLevel() {
+        return levels[state.levelIndex];
+      }
+
+      function getCurrentUnit() {
+        return getCurrentLevel().units[state.unitIndex];
+      }
+
+      function getCurrentLine() {
+        return getCurrentUnit().lines[state.lineIndex];
+      }
+
+      function pickEnglishSystemVoice() {
+        if (!("speechSynthesis" in window)) {
+          return null;
+        }
+        const voices = speechSynthesis.getVoices().filter((v) => v.lang.toLowerCase().startsWith("en"));
+        if (voices.length === 0) {
+          return null;
+        }
+        const preset = state.progress.voicePreset;
+        const scored = voices
+          .map((voice) => {
+            const name = voice.name.toLowerCase();
+            const lang = voice.lang.toLowerCase();
+            let score = 0;
+            if (voice.default) score += 8;
+            if (name.includes("siri") || name.includes("neural") || name.includes("enhanced")) score += 30;
+            if (name.includes("whisper") || name.includes("espeak")) score -= 50;
+
+            if (preset === "us_female") {
+              if (lang.startsWith("en-us")) score += 40;
+              if (
+                name.includes("female") ||
+                name.includes("samantha") ||
+                name.includes("ava") ||
+                name.includes("allison")
+              ) {
+                score += 18;
+              }
+            } else if (preset === "us_male") {
+              if (lang.startsWith("en-us")) score += 40;
+              if (name.includes("male") || name.includes("daniel") || name.includes("tom")) score += 18;
+            } else if (preset === "uk_female") {
+              if (lang.startsWith("en-gb")) score += 40;
+              if (name.includes("female") || name.includes("serena") || name.includes("kate")) score += 18;
+            } else if (lang.startsWith("en-us") || lang.startsWith("en-gb")) {
+              score += 24;
+            }
+            return { voice, score };
+          })
+          .sort((a, b) => b.score - a.score);
+        return scored[0].voice;
+      }
+
+      function pickChineseSystemVoice() {
+        if (!("speechSynthesis" in window)) {
+          return null;
+        }
+        const voices = speechSynthesis.getVoices().filter((v) => v.lang.toLowerCase().startsWith("zh"));
+        if (voices.length === 0) {
+          return null;
+        }
+        return voices.find((v) => v.lang.toLowerCase().startsWith("zh-cn")) || voices[0];
+      }
+
+      function speakBySystem(text, options = {}) {
+        if (!("speechSynthesis" in window)) {
+          return Promise.resolve();
+        }
+        speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = options.lang || "en-US";
+        utterance.rate = options.rate ?? 0.86;
+        utterance.pitch = 1;
+        const selectedVoice = options.lang === "zh-CN" ? pickChineseSystemVoice() : pickEnglishSystemVoice();
+        if (selectedVoice) {
+          utterance.voice = selectedVoice;
+        }
+        return new Promise((resolve) => {
+          utterance.onend = () => resolve();
+          utterance.onerror = () => resolve();
+          speechSynthesis.speak(utterance);
+        });
+      }
+
+      function speak(text, options = {}) {
+        return speakBySystem(text, { ...options, lang: options.lang || "en-US" });
+      }
+
+      function wait(ms) {
+        return new Promise((resolve) => setTimeout(resolve, ms));
+      }
+
+      function tokenize(text) {
+        return text
+          .toLowerCase()
+          .replace(/[^a-z'\s]/g, " ")
+          .split(/\s+/)
+          .filter((w) => w.length > 1);
+      }
+
+      function markLearningDay() {
+        const today = dayKey();
+        if (state.progress.lastDay === today) {
+          return;
+        }
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        const yesterdayKey = `${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(
+          2,
+          "0"
+        )}-${String(yesterday.getDate()).padStart(2, "0")}`;
+        if (state.progress.lastDay === yesterdayKey) {
+          state.progress.streakDays += 1;
+        } else {
+          state.progress.streakDays = 1;
+        }
+        state.progress.lastDay = today;
+        saveProgress();
+      }
+
+      function getAccuracy() {
+        if (state.progress.attempts === 0) {
+          return 0;
+        }
+        return Math.round((state.progress.successes / state.progress.attempts) * 100);
+      }
+
+      function maybeUpgradeLevel() {
+        const accuracy = getAccuracy();
+        if (
+          state.levelIndex < levels.length - 1 &&
+          state.progress.streakDays >= 3 &&
+          accuracy >= 80 &&
+          state.progress.successes >= 6
+        ) {
+          state.levelIndex += 1;
+          state.unitIndex = 0;
+          state.lineIndex = 0;
+          recStatus.textContent = `恭喜升级到 ${getCurrentLevel().id}：${getCurrentLevel().title}`;
+        }
+      }
+
+      function refreshStats() {
+        const level = getCurrentLevel();
+        levelText.textContent = `Level: ${level.id} · ${level.title}`;
+        streakText.textContent = `连续学习: ${state.progress.streakDays} 天`;
+        accuracyText.textContent = `近况正确率: ${getAccuracy()}%`;
+        upgradeHint.textContent =
+          state.levelIndex < levels.length - 1
+            ? "升级条件：连续 3 天 + 正确率 >= 80%"
+            : "已达到最高等级，可继续复习并巩固口语。";
+      }
+
+      function getTodaySeconds() {
+        return state.progress.dailySeconds[dayKey()] || 0;
+      }
+
+      function addDailySeconds(seconds) {
+        const today = dayKey();
+        const current = state.progress.dailySeconds[today] || 0;
+        state.progress.dailySeconds[today] = current + seconds;
+        saveProgress();
+      }
+
+      function refreshDailyPlanUi() {
+        const minutes = Math.floor(getTodaySeconds() / 60);
+        dailyPlanText.textContent = `今日听练进度：${minutes} / 15 分钟`;
+        dailyPlanHint.textContent =
+          minutes >= 15
+            ? "今日计划已完成，继续听练会让口语更稳。"
+            : `还差 ${Math.max(0, 15 - minutes)} 分钟可完成今日目标。`;
+      }
+
+      function getCurrentReviewItem() {
+        if (state.progress.reviewQueue.length === 0) {
+          return null;
+        }
+        const index = Math.max(0, Math.min(state.reviewIndex, state.progress.reviewQueue.length - 1));
+        state.reviewIndex = index;
+        return state.progress.reviewQueue[index];
+      }
+
+      function refreshReviewUi() {
+        const total = state.progress.reviewQueue.length;
+        reviewCountText.textContent = `待复习：${total} 句`;
+        const current = getCurrentReviewItem();
+        if (!current) {
+          reviewSentenceText.textContent = "暂无错句，继续开口练习吧。";
+          return;
+        }
+        reviewSentenceText.textContent = `${state.reviewIndex + 1}/${total} · ${current.en} (${current.zh})`;
+      }
+
+      function buildDrillSentence(base) {
+        const lower = base.toLowerCase();
+        const hit = drillPairs.find((pair) => lower.includes(pair.from));
+        if (!hit) {
+          return { prompt: "将句子中的一个词换成你自己的内容再说一遍。", sentence: base };
+        }
+        const replaced = base.replace(new RegExp(hit.from, "i"), hit.to);
+        return {
+          prompt: `替换练习：把 ${hit.from} 换成 ${hit.to}（${hit.zh}）`,
+          sentence: replaced
+        };
+      }
+
+      function render() {
+        refreshStats();
+        refreshDailyPlanUi();
+        refreshReviewUi();
+        const level = getCurrentLevel();
+        const unit = getCurrentUnit();
+        const line = getCurrentLine();
+        topicText.textContent = `${level.id} · ${unit.topicZh} (${unit.topicEn})`;
+        lineEn.textContent = line.en;
+        lineZh.textContent = line.zh;
+        lineInfo.textContent = `第 ${state.unitIndex + 1}/${level.units.length} 课 · 第 ${state.lineIndex + 1}/${
+          unit.lines.length
+        } 句`;
+
+        modeBtn.textContent = state.mode === "car" ? "车载听练" : "开口训练";
+        modeBtn.classList.toggle("active", state.mode === "speak");
+
+        const drill = buildDrillSentence(line.en);
+        state.currentDrillSentence = drill.sentence;
+        drillPrompt.textContent = drill.prompt;
+        drillSentence.textContent = drill.sentence;
+        levelAutoBtn.classList.toggle("active", state.currentAutoScope === "level");
+        unitAutoBtn.classList.toggle("active", state.currentAutoScope === "unit");
+        voicePresetSelect.value = state.progress.voicePreset;
+        voiceTipText.textContent = "当前使用系统语音：iPad 可在设置中下载 English 增强语音，听感会明显更好。";
+      }
+
+      function stopAutoPlay() {
+        state.autoToken += 1;
+        state.autoPlaying = false;
+        autoPlayBtn.textContent = "连续听练";
+        if ("speechSynthesis" in window) {
+          speechSynthesis.cancel();
+        }
+      }
+
+      async function startAutoPlay(options = {}) {
+        stopAutoPlay();
+        const fromUnitStart = Boolean(options.fromUnitStart);
+        const fromLevelStart = Boolean(options.fromLevelStart);
+        const loopCurrentUnit = Boolean(options.loopCurrentUnit);
+        state.currentAutoScope = fromLevelStart ? "level" : "unit";
+
+        if (fromLevelStart) {
+          state.unitIndex = 0;
+          state.lineIndex = 0;
+        } else if (fromUnitStart) {
+          state.lineIndex = 0;
+        }
+        render();
+
+        const token = state.autoToken + 1;
+        state.autoToken = token;
+        state.autoPlaying = true;
+        autoPlayBtn.textContent = "停止连续听练";
+        const startUnitIdx = state.unitIndex;
+        const endUnitIdx = loopCurrentUnit ? state.unitIndex : getCurrentLevel().units.length - 1;
+
+        for (let unitIdx = startUnitIdx; unitIdx <= endUnitIdx; unitIdx += 1) {
+          const unit = getCurrentLevel().units[unitIdx];
+          const startLineIdx = unitIdx === startUnitIdx ? state.lineIndex : 0;
+          for (let lineIdx = startLineIdx; lineIdx < unit.lines.length; lineIdx += 1) {
+            if (token !== state.autoToken) {
+              return;
+            }
+            state.unitIndex = unitIdx;
+            state.lineIndex = lineIdx;
+            render();
+            const line = getCurrentLine();
+            await speak(line.en, { lang: "en-US", rate: 0.88 });
+            if (token !== state.autoToken) {
+              return;
+            }
+            await wait(100);
+            await speak(`中文意思：${line.zh}`, { lang: "zh-CN", rate: 0.93 });
+            if (token !== state.autoToken) {
+              return;
+            }
+            await wait(120);
+            await speak(line.en, { lang: "en-US", rate: 0.72 });
+            addDailySeconds(14);
+            await wait(450);
+          }
+        }
+
+        if (token === state.autoToken) {
+          state.autoPlaying = false;
+          autoPlayBtn.textContent = "连续听练";
+        }
+      }
+
+      function changeUnit(delta) {
+        stopAutoPlay();
+        const level = getCurrentLevel();
+        const next = Math.max(0, Math.min(level.units.length - 1, state.unitIndex + delta));
+        state.unitIndex = next;
+        state.lineIndex = 0;
+        render();
+      }
+
+      function changeLine(delta) {
+        stopAutoPlay();
+        const unit = getCurrentUnit();
+        const next = Math.max(0, Math.min(unit.lines.length - 1, state.lineIndex + delta));
+        state.lineIndex = next;
+        render();
+      }
+
+      function addToReview(lineEn) {
+        const current = getCurrentLine();
+        const exists = state.progress.reviewQueue.some((item) => item.en === lineEn);
+        if (!exists) {
+          state.progress.reviewQueue.push({
+            en: lineEn,
+            zh: current.zh,
+            levelIndex: state.levelIndex,
+            unitIndex: state.unitIndex,
+            lineIndex: state.lineIndex
+          });
+          if (state.progress.reviewQueue.length > 40) {
+            state.progress.reviewQueue.shift();
+          }
+        }
+      }
+
+      function onRecAttempt(success) {
+        markLearningDay();
+        state.progress.attempts += 1;
+        if (success) {
+          state.progress.successes += 1;
+        } else {
+          addToReview(getCurrentLine().en);
+        }
+        saveProgress();
+        maybeUpgradeLevel();
+        render();
+      }
+
+      function startRecognition() {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SpeechRecognition) {
+          recStatus.textContent = "当前浏览器不支持语音识别，请用 Chrome。";
+          return;
+        }
+        recResult.textContent = "";
+        recScore.textContent = "";
+        recStatus.textContent = "正在听你说...";
+
+        const recognition = new SpeechRecognition();
+        recognition.lang = "en-US";
+        recognition.interimResults = false;
+        recognition.maxAlternatives = 1;
+
+        recognition.onresult = (event) => {
+          const heard = event.results[0][0].transcript || "";
+          recResult.textContent = `你说的是：${heard}`;
+          const targetTokens = tokenize(getCurrentLine().en);
+          const heardTokens = tokenize(heard);
+          let hit = 0;
+          targetTokens.forEach((token) => {
+            if (heardTokens.includes(token)) {
+              hit += 1;
+            }
+          });
+          const ratio = targetTokens.length ? hit / targetTokens.length : 0;
+          const scorePercent = Math.round(ratio * 100);
+          const success = scorePercent >= 60;
+          recScore.textContent = `关键词命中率：${scorePercent}% ${success ? "✅" : "（建议再练一次）"}`;
+          recScore.className = success ? "score-good" : "";
+          recStatus.textContent = success ? "很好！继续下一句。" : "不错，再慢一点、清晰一点试试。";
+          onRecAttempt(success);
+        };
+
+        recognition.onerror = () => {
+          recStatus.textContent = "识别失败，请再试一次。";
+        };
+        recognition.onend = () => {};
+        recognition.start();
+      }
+
+      function markSentenceMastered() {
+        markLearningDay();
+        const key = `${getCurrentLevel().id}-${state.unitIndex}-${state.lineIndex}`;
+        state.progress.mastered[key] = true;
+        state.progress.successes += 1;
+        state.progress.attempts += 1;
+        saveProgress();
+        maybeUpgradeLevel();
+        recStatus.textContent = "已标记为掌握，继续加油！";
+        render();
+      }
+
+      homeBtn.addEventListener("click", () => {
+        stopAutoPlay();
+        window.location.href = "./index.html";
+      });
+      modeBtn.addEventListener("click", () => {
+        state.mode = state.mode === "car" ? "speak" : "car";
+        render();
+      });
+      prevUnitBtn.addEventListener("click", () => changeUnit(-1));
+      nextUnitBtn.addEventListener("click", () => changeUnit(1));
+      prevLineBtn.addEventListener("click", () => changeLine(-1));
+      nextLineBtn.addEventListener("click", () => changeLine(1));
+      speakEnBtn.addEventListener("click", () => speak(getCurrentLine().en, { lang: "en-US", rate: 0.86 }));
+      speakZhBtn.addEventListener("click", () => speak(getCurrentLine().zh, { lang: "zh-CN", rate: 0.93 }));
+      autoPlayBtn.addEventListener("click", () => {
+        if (state.autoPlaying) {
+          stopAutoPlay();
+          return;
+        }
+        startAutoPlay({ fromUnitStart: false });
+      });
+      restartAutoBtn.addEventListener("click", () => startAutoPlay({ fromUnitStart: true }));
+      levelAutoBtn.addEventListener("click", () => startAutoPlay({ fromLevelStart: true }));
+      unitAutoBtn.addEventListener("click", () =>
+        startAutoPlay({ fromUnitStart: true, loopCurrentUnit: true })
+      );
+      startDailyPlanBtn.addEventListener("click", () => startAutoPlay({ fromLevelStart: true }));
+      stopDailyPlanBtn.addEventListener("click", stopAutoPlay);
+      startRecBtn.addEventListener("click", startRecognition);
+      markDoneBtn.addEventListener("click", markSentenceMastered);
+      newDrillBtn.addEventListener("click", render);
+      playDrillBtn.addEventListener("click", () =>
+        speak(state.currentDrillSentence, { lang: "en-US", rate: 0.82 })
+      );
+      reviewPlayBtn.addEventListener("click", () => {
+        const item = getCurrentReviewItem();
+        if (!item) {
+          return;
+        }
+        speak(item.en, { lang: "en-US", rate: 0.82 });
+      });
+      reviewNextBtn.addEventListener("click", () => {
+        if (state.progress.reviewQueue.length === 0) {
+          return;
+        }
+        state.reviewIndex = (state.reviewIndex + 1) % state.progress.reviewQueue.length;
+        refreshReviewUi();
+      });
+      reviewDoneBtn.addEventListener("click", () => {
+        if (state.progress.reviewQueue.length === 0) {
+          return;
+        }
+        state.progress.reviewQueue.splice(state.reviewIndex, 1);
+        if (state.reviewIndex >= state.progress.reviewQueue.length) {
+          state.reviewIndex = Math.max(0, state.progress.reviewQueue.length - 1);
+        }
+        saveProgress();
+        refreshReviewUi();
+      });
+      reviewLocateBtn.addEventListener("click", () => {
+        const item = getCurrentReviewItem();
+        if (!item) {
+          return;
+        }
+        if (
+          Number.isInteger(item.levelIndex) &&
+          Number.isInteger(item.unitIndex) &&
+          Number.isInteger(item.lineIndex)
+        ) {
+          stopAutoPlay();
+          state.levelIndex = Math.max(0, Math.min(levels.length - 1, item.levelIndex));
+          state.unitIndex = Math.max(0, Math.min(getCurrentLevel().units.length - 1, item.unitIndex));
+          state.lineIndex = Math.max(0, Math.min(getCurrentUnit().lines.length - 1, item.lineIndex));
+          render();
+          recStatus.textContent = "已定位到错句所在课程。";
+        }
+      });
+      saveVoiceBtn.addEventListener("click", () => {
+        state.progress.voicePreset = voicePresetSelect.value;
+        saveProgress();
+        render();
+        recStatus.textContent = "发音设置已保存。";
+      });
+      testVoiceBtn.addEventListener("click", async () => {
+        await speak("Hello, welcome to your speaking practice. Let us learn English together.", {
+          lang: "en-US",
+          rate: 0.86
+        });
+      });
+      voicePresetSelect.addEventListener("change", () => {
+        state.progress.voicePreset = voicePresetSelect.value;
+        saveProgress();
+        render();
+      });
+
+      render();
+    </script>
+  </body>
+</html>

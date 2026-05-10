@@ -1,7 +1,9 @@
-const CACHE_NAME = "baby-english-v1";
+const CACHE_NAME = "baby-english-v3";
 const ASSETS = [
   "./",
   "./index.html",
+  "./story.html",
+  "./adult.html",
   "./styles.css",
   "./app.js",
   "./manifest.webmanifest",
