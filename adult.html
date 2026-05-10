@@ -1084,6 +1084,7 @@
         const fromUnitStart = Boolean(options.fromUnitStart);
         const fromLevelStart = Boolean(options.fromLevelStart);
         const loopCurrentUnit = Boolean(options.loopCurrentUnit);
+        const repeat = Boolean(options.repeat);
         state.currentAutoScope = fromLevelStart ? "level" : "unit";
 
         if (fromLevelStart) {
@@ -1098,35 +1099,44 @@
         state.autoToken = token;
         state.autoPlaying = true;
         autoPlayBtn.textContent = "停止连续听练";
-        const startUnitIdx = state.unitIndex;
-        const endUnitIdx = loopCurrentUnit ? state.unitIndex : getCurrentLevel().units.length - 1;
+        const scopeStartUnit = fromLevelStart ? 0 : state.unitIndex;
+        const scopeEndUnit = loopCurrentUnit ? scopeStartUnit : getCurrentLevel().units.length - 1;
+        let firstCycle = true;
 
-        for (let unitIdx = startUnitIdx; unitIdx <= endUnitIdx; unitIdx += 1) {
-          const unit = getCurrentLevel().units[unitIdx];
-          const startLineIdx = unitIdx === startUnitIdx ? state.lineIndex : 0;
-          for (let lineIdx = startLineIdx; lineIdx < unit.lines.length; lineIdx += 1) {
-            if (token !== state.autoToken) {
-              return;
+        while (token === state.autoToken) {
+          for (let unitIdx = scopeStartUnit; unitIdx <= scopeEndUnit; unitIdx += 1) {
+            const unit = getCurrentLevel().units[unitIdx];
+            const startLineIdx = unitIdx === scopeStartUnit && firstCycle ? state.lineIndex : 0;
+            for (let lineIdx = startLineIdx; lineIdx < unit.lines.length; lineIdx += 1) {
+              if (token !== state.autoToken) {
+                return;
+              }
+              state.unitIndex = unitIdx;
+              state.lineIndex = lineIdx;
+              render();
+              const line = getCurrentLine();
+              const audioKey = getCurrentLineAudioKey();
+              await speak(line.en, { lang: "en-US", rate: 1, audioKey });
+              if (token !== state.autoToken) {
+                return;
+              }
+              await wait(100);
+              // Chinese explanation always uses system TTS.
+              await speakBySystem(`中文意思：${line.zh}`, { lang: "zh-CN", rate: 0.93 });
+              if (token !== state.autoToken) {
+                return;
+              }
+              await wait(120);
+              await speak(line.en, { lang: "en-US", rate: 0.78, audioKey });
+              addDailySeconds(14);
+              await wait(450);
             }
-            state.unitIndex = unitIdx;
-            state.lineIndex = lineIdx;
-            render();
-            const line = getCurrentLine();
-            const audioKey = getCurrentLineAudioKey();
-            await speak(line.en, { lang: "en-US", rate: 1, audioKey });
-            if (token !== state.autoToken) {
-              return;
-            }
-            await wait(100);
-            await speak(`中文意思：${line.zh}`, { lang: "zh-CN", rate: 0.93 });
-            if (token !== state.autoToken) {
-              return;
-            }
-            await wait(120);
-            await speak(line.en, { lang: "en-US", rate: 0.78, audioKey });
-            addDailySeconds(14);
-            await wait(450);
           }
+
+          if (!repeat) {
+            break;
+          }
+          firstCycle = false;
         }
 
         if (token === state.autoToken) {
@@ -1259,14 +1269,20 @@
           stopAutoPlay();
           return;
         }
-        startAutoPlay({ fromUnitStart: false });
+        startAutoPlay({ fromUnitStart: false, loopCurrentUnit: true, repeat: true });
       });
-      restartAutoBtn.addEventListener("click", () => startAutoPlay({ fromUnitStart: true }));
-      levelAutoBtn.addEventListener("click", () => startAutoPlay({ fromLevelStart: true }));
-      unitAutoBtn.addEventListener("click", () =>
-        startAutoPlay({ fromUnitStart: true, loopCurrentUnit: true })
+      restartAutoBtn.addEventListener("click", () =>
+        startAutoPlay({ fromUnitStart: true, loopCurrentUnit: true, repeat: true })
       );
-      startDailyPlanBtn.addEventListener("click", () => startAutoPlay({ fromLevelStart: true }));
+      levelAutoBtn.addEventListener("click", () =>
+        startAutoPlay({ fromLevelStart: true, loopCurrentUnit: false, repeat: true })
+      );
+      unitAutoBtn.addEventListener("click", () =>
+        startAutoPlay({ fromUnitStart: true, loopCurrentUnit: true, repeat: true })
+      );
+      startDailyPlanBtn.addEventListener("click", () =>
+        startAutoPlay({ fromLevelStart: true, loopCurrentUnit: false, repeat: false })
+      );
       stopDailyPlanBtn.addEventListener("click", stopAutoPlay);
       startRecBtn.addEventListener("click", startRecognition);
       markDoneBtn.addEventListener("click", markSentenceMastered);
