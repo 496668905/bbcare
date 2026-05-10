@@ -160,7 +160,6 @@ const azureApiKeyInput = document.getElementById("azureApiKeyInput");
 let currentCategoryIndex = null;
 let lastSpokenEntry = null;
 let touchStartX = null;
-let titleLongPressTimer = null;
 let autoplaySessionToken = 0;
 let playingWordIndex = null;
 let currentWordSet = [];
@@ -215,7 +214,7 @@ function createHome() {
 
   const tip = document.createElement("p");
   tip.className = "parent-mode-tip";
-  tip.textContent = "长按顶部标题 1.2 秒可进入家长模式";
+  tip.textContent = "点击顶部标题进入家长模式";
 
   const dailyBtn = document.createElement("button");
   dailyBtn.className = "big-btn daily-btn";
@@ -838,22 +837,13 @@ function closeParentMode() {
 }
 
 function setupParentMode() {
-  const startPress = () => {
-    clearTimeout(titleLongPressTimer);
-    titleLongPressTimer = window.setTimeout(() => {
+  pageTitle.addEventListener("click", () => openParentMode());
+  pageTitle.addEventListener("keydown", (event) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
       openParentMode();
-    }, 1200);
-  };
-  const endPress = () => {
-    clearTimeout(titleLongPressTimer);
-  };
-
-  pageTitle.addEventListener("mousedown", startPress);
-  pageTitle.addEventListener("touchstart", startPress, { passive: true });
-  pageTitle.addEventListener("mouseup", endPress);
-  pageTitle.addEventListener("mouseleave", endPress);
-  pageTitle.addEventListener("touchend", endPress);
-  pageTitle.addEventListener("touchcancel", endPress);
+    }
+  });
 
   closeParentModalBtn.addEventListener("click", closeParentMode);
   parentModal.addEventListener("click", (event) => {

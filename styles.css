@@ -50,6 +50,11 @@ h1 {
   line-height: 1.2;
 }
 
+#pageTitle {
+  cursor: pointer;
+  user-select: none;
+}
+
 .view {
   padding: 20px 14px 120px;
 }
