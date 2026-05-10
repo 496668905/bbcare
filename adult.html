@@ -259,6 +259,11 @@
 
         <section class="panel">
           <h3>发音设置（iPad 优化）</h3>
+          <p>英文播放模式</p>
+          <select id="audioEngineSelect">
+            <option value="local">本地课程音频（推荐，息屏更稳）</option>
+            <option value="system">系统实时朗读</option>
+          </select>
           <p>英文声线</p>
           <select id="voicePresetSelect">
             <option value="us_female">美音女声</option>
@@ -640,6 +645,7 @@
       const reviewLocateBtn = document.getElementById("reviewLocateBtn");
       const reviewNextBtn = document.getElementById("reviewNextBtn");
       const reviewDoneBtn = document.getElementById("reviewDoneBtn");
+      const audioEngineSelect = document.getElementById("audioEngineSelect");
       const voicePresetSelect = document.getElementById("voicePresetSelect");
       const testVoiceBtn = document.getElementById("testVoiceBtn");
       const saveVoiceBtn = document.getElementById("saveVoiceBtn");
@@ -684,6 +690,7 @@
               mastered: {},
               reviewQueue: [],
               dailySeconds: {},
+              audioEngine: "local",
               voicePreset: "us_female"
             };
           }
@@ -692,10 +699,13 @@
             ? parsed.reviewQueue
                 .map((item) => {
                   if (typeof item === "string") {
-                    return { en: item, zh: "中文释义待补充" };
+                    return { en: item, zh: "中文释义待补充", audioKey: "" };
                   }
                   if (item && item.en) {
-                    return item;
+                    return {
+                      ...item,
+                      audioKey: item.audioKey || ""
+                    };
                   }
                   return null;
                 })
@@ -709,6 +719,7 @@
             mastered: parsed.mastered || {},
             reviewQueue: normalizedQueue,
             dailySeconds: parsed.dailySeconds || {},
+            audioEngine: parsed.audioEngine || "local",
             voicePreset: parsed.voicePreset || "us_female"
           };
         } catch {
@@ -720,6 +731,7 @@
             mastered: {},
             reviewQueue: [],
             dailySeconds: {},
+            audioEngine: "local",
             voicePreset: "us_female"
           };
         }
@@ -795,6 +807,31 @@
         return voices.find((v) => v.lang.toLowerCase().startsWith("zh-cn")) || voices[0];
       }
 
+      const lessonAudioPlayer = new Audio();
+      lessonAudioPlayer.preload = "auto";
+
+      function getCurrentLineAudioKey() {
+        const level = getCurrentLevel();
+        return `${level.id}_u${state.unitIndex + 1}_l${state.lineIndex + 1}`;
+      }
+
+      async function playLessonAudio(src, playbackRate = 1) {
+        try {
+          lessonAudioPlayer.pause();
+          lessonAudioPlayer.src = src;
+          lessonAudioPlayer.currentTime = 0;
+          lessonAudioPlayer.playbackRate = playbackRate;
+          await new Promise((resolve, reject) => {
+            lessonAudioPlayer.onended = () => resolve();
+            lessonAudioPlayer.onerror = () => reject(new Error("audio failed"));
+            lessonAudioPlayer.play().catch(reject);
+          });
+          return true;
+        } catch {
+          return false;
+        }
+      }
+
       function speakBySystem(text, options = {}) {
         if (!("speechSynthesis" in window)) {
           return Promise.resolve();
@@ -816,7 +853,20 @@
       }
 
       function speak(text, options = {}) {
-        return speakBySystem(text, { ...options, lang: options.lang || "en-US" });
+        const lang = options.lang || "en-US";
+        const audioKey = options.audioKey || "";
+        const shouldUseLocalAudio =
+          lang.startsWith("en") && state.progress.audioEngine === "local" && Boolean(audioKey);
+        if (shouldUseLocalAudio) {
+          const src = `./audio/adult/en/${audioKey}.mp3`;
+          return playLessonAudio(src, options.rate || 1).then((played) => {
+            if (played) {
+              return;
+            }
+            return speakBySystem(text, { ...options, lang });
+          });
+        }
+        return speakBySystem(text, { ...options, lang });
       }
 
       let wakeLockSentinel = null;
@@ -1007,8 +1057,12 @@
         unitAutoBtn.classList.toggle("active", state.currentAutoScope === "unit");
         enableBgModeBtn.classList.toggle("active", state.keepAwakeEnabled);
         disableBgModeBtn.classList.toggle("active", !state.keepAwakeEnabled);
+        audioEngineSelect.value = state.progress.audioEngine;
         voicePresetSelect.value = state.progress.voicePreset;
-        voiceTipText.textContent = "当前使用系统语音：iPad 可在设置中下载 English 增强语音，听感会明显更好。";
+        voiceTipText.textContent =
+          state.progress.audioEngine === "local"
+            ? "当前使用本地课程音频：更稳定，车载/息屏场景更适合。"
+            : "当前使用系统语音：iPad 可在设置中下载 English 增强语音。";
       }
 
       function stopAutoPlay() {
@@ -1018,6 +1072,8 @@
         if ("speechSynthesis" in window) {
           speechSynthesis.cancel();
         }
+        lessonAudioPlayer.pause();
+        lessonAudioPlayer.src = "";
       }
 
       async function startAutoPlay(options = {}) {
@@ -1056,7 +1112,8 @@
             state.lineIndex = lineIdx;
             render();
             const line = getCurrentLine();
-            await speak(line.en, { lang: "en-US", rate: 0.88 });
+            const audioKey = getCurrentLineAudioKey();
+            await speak(line.en, { lang: "en-US", rate: 1, audioKey });
             if (token !== state.autoToken) {
               return;
             }
@@ -1066,7 +1123,7 @@
               return;
             }
             await wait(120);
-            await speak(line.en, { lang: "en-US", rate: 0.72 });
+            await speak(line.en, { lang: "en-US", rate: 0.78, audioKey });
             addDailySeconds(14);
             await wait(450);
           }
@@ -1104,7 +1161,8 @@
             zh: current.zh,
             levelIndex: state.levelIndex,
             unitIndex: state.unitIndex,
-            lineIndex: state.lineIndex
+            lineIndex: state.lineIndex,
+            audioKey: getCurrentLineAudioKey()
           });
           if (state.progress.reviewQueue.length > 40) {
             state.progress.reviewQueue.shift();
@@ -1192,7 +1250,9 @@
       nextUnitBtn.addEventListener("click", () => changeUnit(1));
       prevLineBtn.addEventListener("click", () => changeLine(-1));
       nextLineBtn.addEventListener("click", () => changeLine(1));
-      speakEnBtn.addEventListener("click", () => speak(getCurrentLine().en, { lang: "en-US", rate: 0.86 }));
+      speakEnBtn.addEventListener("click", () =>
+        speak(getCurrentLine().en, { lang: "en-US", rate: 1, audioKey: getCurrentLineAudioKey() })
+      );
       speakZhBtn.addEventListener("click", () => speak(getCurrentLine().zh, { lang: "zh-CN", rate: 0.93 }));
       autoPlayBtn.addEventListener("click", () => {
         if (state.autoPlaying) {
@@ -1219,7 +1279,7 @@
         if (!item) {
           return;
         }
-        speak(item.en, { lang: "en-US", rate: 0.82 });
+        speak(item.en, { lang: "en-US", rate: 1, audioKey: item.audioKey || "" });
       });
       reviewNextBtn.addEventListener("click", () => {
         if (state.progress.reviewQueue.length === 0) {
@@ -1258,19 +1318,31 @@
         }
       });
       saveVoiceBtn.addEventListener("click", () => {
+        state.progress.audioEngine = audioEngineSelect.value;
         state.progress.voicePreset = voicePresetSelect.value;
         saveProgress();
         render();
         recStatus.textContent = "发音设置已保存。";
       });
       testVoiceBtn.addEventListener("click", async () => {
-        await speak("Hello, welcome to your speaking practice. Let us learn English together.", {
+        const line = getCurrentLine();
+        await speak(line.en, {
           lang: "en-US",
-          rate: 0.86
+          rate: 1,
+          audioKey: getCurrentLineAudioKey()
         });
+        recStatus.textContent =
+          state.progress.audioEngine === "local"
+            ? "已试听：本地课程音频（当前句）"
+            : "已试听：系统实时朗读（当前句）";
       });
       voicePresetSelect.addEventListener("change", () => {
         state.progress.voicePreset = voicePresetSelect.value;
+        saveProgress();
+        render();
+      });
+      audioEngineSelect.addEventListener("change", () => {
+        state.progress.audioEngine = audioEngineSelect.value;
         saveProgress();
         render();
       });
