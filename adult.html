@@ -230,7 +230,7 @@
           <p id="levelText">Level: L1</p>
           <p id="streakText">连续学习: 0 天</p>
           <p id="accuracyText">近况正确率: 0%</p>
-          <p id="upgradeHint">升级条件：连续 3 天 + 正确率 >= 80%</p>
+          <p id="upgradeHint">升级条件：连续 2 天 + 正确率 >= 65%</p>
         </section>
 
         <section class="panel">
@@ -343,6 +343,10 @@
 
     <script>
       const PROGRESS_KEY = "adult_speaking_progress_v1";
+      /** 升级门槛（比早期版本略宽松） */
+      const LEVEL_UP_STREAK_DAYS = 2;
+      const LEVEL_UP_ACCURACY_PCT = 65;
+      const LEVEL_UP_MIN_SUCCESSES = 4;
       const dayKey = () => {
         const now = new Date();
         return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(
@@ -384,6 +388,26 @@
                 { en: "Please stop here.", zh: "请在这里停。" },
                 { en: "Keep the change.", zh: "零钱不用找了。" }
               ]
+            },
+            {
+              topicZh: "餐厅点餐",
+              topicEn: "Ordering Food",
+              lines: [
+                { en: "May I see the menu, please?", zh: "可以看一下菜单吗？" },
+                { en: "I am allergic to peanuts.", zh: "我对花生过敏。" },
+                { en: "Could we have the bill?", zh: "可以买单吗？" },
+                { en: "The food was delicious.", zh: "食物很美味。" }
+              ]
+            },
+            {
+              topicZh: "问路指路",
+              topicEn: "Directions",
+              lines: [
+                { en: "Excuse me, where is the nearest subway station?", zh: "打扰一下，最近的地铁站在哪里？" },
+                { en: "Is it far from here?", zh: "离这里远吗？" },
+                { en: "Turn left at the traffic lights.", zh: "在红绿灯处左转。" },
+                { en: "You can't miss it.", zh: "你不会错过的。" }
+              ]
             }
           ]
         },
@@ -420,6 +444,26 @@
                 { en: "Let us eat together tonight.", zh: "今晚我们一起吃饭吧。" },
                 { en: "Thank you for your help.", zh: "谢谢你的帮助。" }
               ]
+            },
+            {
+              topicZh: "天气与出行",
+              topicEn: "Weather & Travel",
+              lines: [
+                { en: "It looks like it will rain this afternoon.", zh: "看起来今天下午会下雨。" },
+                { en: "I should bring an umbrella.", zh: "我应该带把伞。" },
+                { en: "The traffic is heavier than usual.", zh: "交通比平时更堵。" },
+                { en: "Let us leave ten minutes earlier.", zh: "我们提前十分钟出发吧。" }
+              ]
+            },
+            {
+              topicZh: "健康与运动",
+              topicEn: "Health & Fitness",
+              lines: [
+                { en: "I have been sleeping better lately.", zh: "我最近睡眠更好了。" },
+                { en: "I want to walk at least eight thousand steps.", zh: "我想至少走八千步。" },
+                { en: "Could you recommend a light exercise?", zh: "你可以推荐一项轻松运动吗？" },
+                { en: "I will start with short walks.", zh: "我会从短距离步行开始。" }
+              ]
             }
           ]
         },
@@ -448,6 +492,17 @@
                 { en: "My teammate smiled and helped me.", zh: "我的同事笑着帮了我。" },
                 { en: "In the end, everything was fine.", zh: "最后一切都很好。" }
               ]
+            },
+            {
+              topicZh: "表达喜好与意见",
+              topicEn: "Likes & Opinions",
+              lines: [
+                { en: "I prefer quiet cafes with natural light.", zh: "我更喜欢安静、有自然光的咖啡馆。" },
+                { en: "To be honest, I was not fully convinced.", zh: "老实说，我并没有完全被说服。" },
+                { en: "I would rather keep things simple.", zh: "我宁愿把事情保持简单。" },
+                { en: "In my experience, consistency matters most.", zh: "以我的经验，坚持最重要。" },
+                { en: "What matters to me is clear communication.", zh: "对我来说重要的是沟通清楚。" }
+              ]
             }
           ]
         },
@@ -474,16 +529,36 @@
                 { en: "The main risk is delivery time.", zh: "主要风险是交付时间。" },
                 { en: "Could we confirm the next step?", zh: "我们可以确认下一步吗？" }
               ]
+            },
+            {
+              topicZh: "餐厅订位",
+              topicEn: "Restaurant Reservation",
+              lines: [
+                { en: "I would like to book a table for two at seven.", zh: "我想订晚上七点的两人桌。" },
+                { en: "Do you have a table near the window?", zh: "你们有靠窗的位子吗？" },
+                { en: "Is there a vegetarian option on the menu?", zh: "菜单上有素食吗？" },
+                { en: "We may arrive ten minutes late.", zh: "我们可能会迟到十分钟。" }
+              ]
+            },
+            {
+              topicZh: "售后服务",
+              topicEn: "Customer Service",
+              lines: [
+                { en: "I would like to return this item.", zh: "我想退这件商品。" },
+                { en: "Here is my order number and receipt.", zh: "这是我的订单号和收据。" },
+                { en: "Could you process a refund to my card?", zh: "可以退款到我的卡上吗？" },
+                { en: "I am satisfied with your quick response.", zh: "我对你们的快速回复很满意。" }
+              ]
             }
           ]
         }
       ];
 
       const targetUnitCountByLevel = {
-        L1: 18,
-        L2: 18,
-        L3: 14,
-        L4: 14
+        L1: 26,
+        L2: 26,
+        L3: 20,
+        L4: 20
       };
 
       function buildGeneratedUnit(levelId, index) {
@@ -504,14 +579,82 @@
           ];
           const scene = scenes[index % scenes.length];
           const orderNo = index + 1;
+          const w = scene[2];
+          const wZh = scene[3];
+          const cycle = Math.floor(index / scenes.length);
+          const v = (index + cycle) % 6;
+          const askEn = [
+            `Excuse me, where is the ${w}?`,
+            `Excuse me, could you tell me where the ${w} is?`,
+            `Sorry, where can I find the ${w}?`,
+            `Hi, is the ${w} around here?`,
+            `Could you point me to the ${w}?`,
+            `Do you know where I can get the ${w}?`
+          ];
+          const wantEn = [
+            `I would like one ${w}, please.`,
+            `I'll take one ${w}, please.`,
+            `Could I get one ${w}, please?`,
+            `I'd like to buy a ${w}, please.`,
+            `Can I have one ${w}, please?`,
+            `I need one ${w}, please.`
+          ];
+          const askZh = [
+            `打扰一下，${wZh}在哪里？`,
+            `打扰一下，请问${wZh}在哪儿？`,
+            `不好意思，哪里能找到${wZh}？`,
+            `你好，这附近有${wZh}吗？`,
+            `请问${wZh}怎么走？`,
+            `你知道在哪儿买${wZh}吗？`
+          ];
+          const wantZh = [
+            `我想要一个${wZh}。`,
+            `我要买一个${wZh}。`,
+            `能给我来一个${wZh}吗？`,
+            `我想买一份${wZh}。`,
+            `请给我来一个${wZh}。`,
+            `我需要一份${wZh}。`
+          ];
+          const payEn = [
+            "Can I pay by card?",
+            "Do you take cards here?",
+            "Is contactless payment okay?",
+            "Can I use mobile pay?",
+            "Do you accept credit cards?",
+            "May I pay with my phone?"
+          ];
+          const payZh = [
+            "我可以刷卡吗？",
+            "这里可以刷卡吗？",
+            "可以闪付吗？",
+            "可以用手机支付吗？",
+            "你们收信用卡吗？",
+            "我能用手机付款吗？"
+          ];
+          const byeEn = [
+            "Thank you, have a nice day.",
+            "Thanks for your help.",
+            "I appreciate it. Goodbye.",
+            "Thank you so much.",
+            "Thanks, take care.",
+            "Many thanks, see you."
+          ];
+          const byeZh = [
+            "谢谢，祝你有美好的一天。",
+            "谢谢你的帮助。",
+            "非常感谢，再见。",
+            "太谢谢你了。",
+            "谢谢，保重。",
+            "多谢，回头见。"
+          ];
           return {
             topicZh: `${scene[0]}口语 ${orderNo}`,
             topicEn: `${scene[1]} Practice ${orderNo}`,
             lines: [
-              { en: `Excuse me, where is the ${scene[2]}?`, zh: `打扰一下，${scene[3]}在哪里？` },
-              { en: `I would like one ${scene[2]}, please.`, zh: `我想要一个${scene[3]}。` },
-              { en: "Can I pay by card?", zh: "我可以刷卡吗？" },
-              { en: "Thank you, have a nice day.", zh: "谢谢，祝你有美好的一天。" }
+              { en: askEn[v], zh: askZh[v] },
+              { en: wantEn[(v + 1) % 6], zh: wantZh[(v + 1) % 6] },
+              { en: payEn[(v + 2) % 6], zh: payZh[(v + 2) % 6] },
+              { en: byeEn[(v + 3) % 6], zh: byeZh[(v + 3) % 6] }
             ]
           };
         }
@@ -530,14 +673,48 @@
           ];
           const t = topics[index % topics.length];
           const orderNo = index + 1;
+          const cycle = Math.floor(index / topics.length);
+          const v = (index + cycle) % 6;
+          const syncEn = [
+            "Can we talk about it after lunch?",
+            "Could we sync briefly this afternoon?",
+            "How about we talk tonight?",
+            "Can we go over it tomorrow morning?",
+            "Could we chat after work?",
+            "Let us connect before the weekend."
+          ];
+          const syncZh = [
+            "我们午饭后聊这个可以吗？",
+            "今天下午快速同步一下可以吗？",
+            "今晚聊一下可以吗？",
+            "明天上午再说可以吗？",
+            "下班后聊一下可以吗？",
+            "周末前我们对一下可以吗？"
+          ];
+          const tailEn = [
+            "Please let me know if anything changes.",
+            "Tell me if the plan shifts.",
+            "Send me a message if the timing moves.",
+            "Keep me posted if something changes.",
+            "Let me know if you need to adjust it.",
+            "Ping me if anything looks different."
+          ];
+          const tailZh = [
+            "如果有变化请告诉我。",
+            "计划有变请告诉我。",
+            "时间调整请发我消息。",
+            "有变动请随时同步我。",
+            "需要调整请告诉我。",
+            "情况不一样请跟我说一声。"
+          ];
           return {
             topicZh: `${t[0]} ${orderNo}`,
             topicEn: `${t[1]} ${orderNo}`,
             lines: [
               { en: `I need to confirm the ${t[2]} plan.`, zh: `我需要确认${t[3]}安排。` },
-              { en: `Can we talk about it after lunch?`, zh: "我们午饭后聊这个可以吗？" },
+              { en: syncEn[v], zh: syncZh[v] },
               { en: `I will send you an update before ${t[4]}.`, zh: `我会在${t[5]}前给你更新。` },
-              { en: "Please let me know if anything changes.", zh: "如果有变化请告诉我。" }
+              { en: tailEn[(v + 2) % 6], zh: tailZh[(v + 2) % 6] }
             ]
           };
         }
@@ -552,15 +729,81 @@
           ];
           const s = stories[index % stories.length];
           const orderNo = index + 1;
+          const cycle = Math.floor(index / stories.length);
+          const v = (index + cycle) % 6;
+          const l2en = [
+            "At first, I felt a little nervous.",
+            "At first, I was unsure what to do.",
+            "At first, it felt a bit overwhelming.",
+            "At first, I hesitated for a moment.",
+            "At first, I worried I might mess up.",
+            "At first, I took a deep breath and paused."
+          ];
+          const l2zh = [
+            "一开始我有点紧张。",
+            "一开始我不太确定怎么做。",
+            "一开始我有点压力。",
+            "一开始我犹豫了一下。",
+            "一开始我担心会搞砸。",
+            "一开始我深呼吸停了一下。"
+          ];
+          const l3en = [
+            "Then I tried another way and it worked.",
+            "Then I adjusted my approach and it helped.",
+            "Then I asked for help and things improved.",
+            "Then I slowed down and thought it through.",
+            "Then I made a small change and it paid off.",
+            "Then I focused on one step at a time."
+          ];
+          const l3zh = [
+            "后来我尝试了另一种方法，结果成功了。",
+            "后来我调整了做法，情况好转了。",
+            "后来我求助了，事情顺多了。",
+            "后来我放慢速度想清楚。",
+            "后来我做了一个小改变，效果不错。",
+            "后来我一步一步来。"
+          ];
+          const l4en = [
+            "This experience helped me trust myself more.",
+            "This experience taught me to stay calm.",
+            "This experience reminded me to prepare early.",
+            "This experience made me more patient.",
+            "This experience showed me I can adapt.",
+            "This experience built my confidence slowly."
+          ];
+          const l4zh = [
+            "这次经历让我更相信自己。",
+            "这次经历教会我要冷静。",
+            "这次经历提醒我要早点准备。",
+            "这次经历让我更有耐心。",
+            "这次经历让我知道我能调整。",
+            "这次经历慢慢建立我的信心。"
+          ];
+          const l5en = [
+            "Next time, I will prepare better and keep practicing.",
+            "Next time, I will plan ahead and stay steady.",
+            "Next time, I will ask earlier if I feel stuck.",
+            "Next time, I will review the key phrases first.",
+            "Next time, I will practice out loud more often.",
+            "Next time, I will keep notes and repeat them."
+          ];
+          const l5zh = [
+            `下次我会准备更好，并继续${s[5]}。`,
+            "下次我会提前规划，保持稳定。",
+            "下次卡住我会更早求助。",
+            "下次我会先复习关键句子。",
+            "下次我会更常大声练习。",
+            "下次我会记笔记并多重复。"
+          ];
           return {
             topicZh: `${s[0]} ${orderNo}`,
             topicEn: `${s[1]} ${orderNo}`,
             lines: [
               { en: `Yesterday I had to change my ${s[2]} plan.`, zh: `昨天我不得不调整${s[3]}计划。` },
-              { en: `At first, I felt a little nervous.`, zh: "一开始我有点紧张。" },
-              { en: `Then I tried another way and it worked.`, zh: "后来我尝试了另一种方法，结果成功了。" },
-              { en: `This experience helped me trust myself more.`, zh: "这次经历让我更相信自己。" },
-              { en: "Next time, I will prepare better and keep practicing.", zh: `下次我会准备更好，并继续${s[5]}。` }
+              { en: l2en[v], zh: l2zh[v] },
+              { en: l3en[(v + 1) % 6], zh: l3zh[(v + 1) % 6] },
+              { en: l4en[(v + 2) % 6], zh: l4zh[(v + 2) % 6] },
+              { en: l5en[(v + 3) % 6], zh: l5zh[(v + 3) % 6] }
             ]
           };
         }
@@ -575,14 +818,64 @@
         ];
         const d = dialogs[index % dialogs.length];
         const orderNo = index + 1;
+        const cycle = Math.floor(index / dialogs.length);
+        const v = (index + cycle) % 6;
+        const helpEn = [
+          "Could you help me solve this issue today?",
+          "Could you help me handle this today?",
+          "Can you assist me with this today?",
+          "Would you mind helping me with this today?",
+          "I hope you can support me on this today.",
+          "Can we resolve this together today?"
+        ];
+        const helpZh = [
+          "你今天可以帮我解决这个问题吗？",
+          "你今天能帮我处理一下吗？",
+          "你今天能协助我吗？",
+          "你今天方便帮我一下吗？",
+          "希望你能今天支持我处理。",
+          "我们今天能一起解决吗？"
+        ];
+        const thanksEn = [
+          "I understand, and I appreciate your support.",
+          "I understand, thank you for your patience.",
+          "I understand, thanks for explaining clearly.",
+          "I understand, I really appreciate your help.",
+          "I understand, that makes sense to me.",
+          "I understand, I am grateful for your time."
+        ];
+        const thanksZh = [
+          "我明白，也感谢你的支持。",
+          "我明白，谢谢你的耐心。",
+          "我明白，谢谢你讲清楚。",
+          "我明白，非常感谢你的帮助。",
+          "我明白，这样我就清楚了。",
+          "我明白，感谢你的时间。"
+        ];
+        const nextEn = [
+          "Let us agree on the next step right now.",
+          "Let us lock the next step together now.",
+          "Let us confirm the next action right now.",
+          "Let us decide the follow-up right now.",
+          "Let us outline the next move right now.",
+          "Let us set a clear next step right now."
+        ];
+        const nextZh = [
+          "我们现在把下一步确认下来吧。",
+          "我们现在把下一步定下来吧。",
+          "我们现在确认接下来的动作吧。",
+          "我们现在把后续安排定了吧。",
+          "我们现在把下一步怎么走对齐吧。",
+          "我们现在明确下一步吧。"
+        ];
         return {
           topicZh: `${d[0]} ${orderNo}`,
           topicEn: `${d[1]} ${orderNo}`,
           lines: [
             { en: `I would like to confirm my ${d[2]}.`, zh: `我想确认一下我的${d[3]}。` },
-            { en: "Could you help me solve this issue today?", zh: "你今天可以帮我解决这个问题吗？" },
-            { en: "I understand, and I appreciate your support.", zh: "我明白，也感谢你的支持。" },
-            { en: "Let us agree on the next step right now.", zh: "我们现在把下一步确认下来吧。" }
+            { en: helpEn[v], zh: helpZh[v] },
+            { en: thanksEn[(v + 1) % 6], zh: thanksZh[(v + 1) % 6] },
+            { en: nextEn[(v + 2) % 6], zh: nextZh[(v + 2) % 6] }
           ]
         };
       }
@@ -853,20 +1146,88 @@
         return `${level.id}_u${state.unitIndex + 1}_l${state.lineIndex + 1}`;
       }
 
+      /** 与 scripts/generate_adult_audio.py 一致：用课文内容哈希命名 mp3，避免旧 L1_u1_l1.mp3 与屏显错位 */
+      function normalizeAdultEn(t) {
+        return String(t || "")
+          .trim()
+          .replace(/\s+/g, " ")
+          .toLowerCase()
+          .replace(/[\u2018\u2019\u2032]/g, "'")
+          .replace(/[\u201c\u201d]/g, '"');
+      }
+
+      function adultContentHash8(text) {
+        const s = normalizeAdultEn(text);
+        const data = new TextEncoder().encode(s);
+        let h = 5381 >>> 0;
+        for (let i = 0; i < data.length; i++) {
+          h = (((h << 5) + h) ^ data[i]) >>> 0;
+        }
+        return h.toString(16).padStart(8, "0");
+      }
+
+      function makeAdultLocalMp3FileName(audioKey, englishText) {
+        if (!audioKey || !englishText) {
+          return "";
+        }
+        return `${audioKey}_${adultContentHash8(englishText)}.mp3`;
+      }
+
       async function playLessonAudio(src, playbackRate = 1) {
+        const el = lessonAudioPlayer;
+        const maxWaitMs = 45000;
         try {
-          lessonAudioPlayer.pause();
-          lessonAudioPlayer.src = src;
-          lessonAudioPlayer.currentTime = 0;
-          lessonAudioPlayer.playbackRate = playbackRate;
-          lessonAudioPlayer.load();
+          el.pause();
+          el.removeAttribute("src");
+          try {
+            el.load();
+          } catch {
+            /* ignore */
+          }
+          el.src = src;
+          el.currentTime = 0;
+          el.playbackRate = playbackRate;
+          el.load();
+
           await new Promise((resolve, reject) => {
-            lessonAudioPlayer.onended = () => resolve();
-            lessonAudioPlayer.onerror = () => reject(new Error("audio failed"));
-            lessonAudioPlayer.play().catch(reject);
+            let settled = false;
+            const cleanup = () => {
+              if (settled) {
+                return;
+              }
+              settled = true;
+              clearTimeout(timer);
+              el.onended = null;
+              el.onerror = null;
+            };
+            const done = (ok) => {
+              cleanup();
+              if (ok) {
+                resolve();
+              } else {
+                reject(new Error("audio failed"));
+              }
+            };
+            const timer = window.setTimeout(() => {
+              try {
+                el.pause();
+              } catch {
+                /* ignore */
+              }
+              done(false);
+            }, maxWaitMs);
+
+            el.onended = () => done(true);
+            el.onerror = () => done(false);
+            el.play().catch(() => done(false));
           });
           return true;
         } catch {
+          try {
+            el.pause();
+          } catch {
+            /* ignore */
+          }
           return false;
         }
       }
@@ -897,18 +1258,22 @@
       function speak(text, options = {}) {
         const lang = options.lang || "en-US";
         const audioKey = options.audioKey || "";
-        const shouldUseLocalAudio =
+        const shouldTryLocal =
           lang.startsWith("en") && state.progress.audioEngine === "local" && Boolean(audioKey);
-        if (shouldUseLocalAudio) {
-          const src = `./audio/adult/en/${audioKey}.mp3`;
-          return playLessonAudio(src, options.rate || 1).then((played) => {
-            if (played) {
-              return;
-            }
-            return speakBySystem(text, { ...options, lang });
-          });
+        if (!shouldTryLocal) {
+          return speakBySystem(text, { ...options, lang });
         }
-        return speakBySystem(text, { ...options, lang });
+        const file = makeAdultLocalMp3FileName(audioKey, text);
+        if (!file) {
+          return speakBySystem(text, { ...options, lang });
+        }
+        const src = `./audio/adult/en/${file}`;
+        return playLessonAudio(src, options.rate || 1).then((played) => {
+          if (played) {
+            return;
+          }
+          return speakBySystem(text, { ...options, lang });
+        });
       }
 
       let wakeLockSentinel = null;
@@ -999,9 +1364,9 @@
         const accuracy = getAccuracy();
         if (
           state.levelIndex < levels.length - 1 &&
-          state.progress.streakDays >= 3 &&
-          accuracy >= 80 &&
-          state.progress.successes >= 6
+          state.progress.streakDays >= LEVEL_UP_STREAK_DAYS &&
+          accuracy >= LEVEL_UP_ACCURACY_PCT &&
+          state.progress.successes >= LEVEL_UP_MIN_SUCCESSES
         ) {
           state.levelIndex += 1;
           state.unitIndex = 0;
@@ -1017,7 +1382,7 @@
         accuracyText.textContent = `近况正确率: ${getAccuracy()}%`;
         upgradeHint.textContent =
           state.levelIndex < levels.length - 1
-            ? "升级条件：连续 3 天 + 正确率 >= 80%"
+            ? `升级条件：连续 ${LEVEL_UP_STREAK_DAYS} 天 + 正确率 >= ${LEVEL_UP_ACCURACY_PCT}% + 成功跟读至少 ${LEVEL_UP_MIN_SUCCESSES} 次`
             : "已达到最高等级，可继续复习并巩固口语。";
       }
 
@@ -1103,7 +1468,7 @@
         voicePresetSelect.value = state.progress.voicePreset;
         voiceTipText.textContent =
           state.progress.audioEngine === "local"
-            ? "当前使用本地课程音频：更稳定，车载/息屏场景更适合。"
+            ? "本地音频按「课位+课文哈希」命名；更新课程后请运行 scripts/generate_adult_audio.py 生成 mp3，未生成时自动用系统朗读。"
             : "当前使用系统语音：iPad 可在设置中下载 English 增强语音。";
       }
 
@@ -1135,10 +1500,23 @@
         state.currentAutoScope = fromLevelStart ? "level" : "unit";
 
         if (fromLevelStart) {
-          state.unitIndex = 0;
-          state.lineIndex = 0;
+          /* 整级播放：从当前选中的课/句开始，不在此重置到开头 */
         } else if (fromUnitStart) {
           state.lineIndex = 0;
+        }
+        const anchorUnit = state.unitIndex;
+        const levelLastUnit = getCurrentLevel().units.length - 1;
+        const anchorUnitClamped = Math.max(0, Math.min(anchorUnit, levelLastUnit));
+        const anchorUnitLines = getCurrentLevel().units[anchorUnitClamped].lines.length;
+        const anchorLine = Math.max(
+          0,
+          Math.min(state.lineIndex, Math.max(0, anchorUnitLines - 1))
+        );
+        if (anchorUnit !== anchorUnitClamped) {
+          state.unitIndex = anchorUnitClamped;
+        }
+        if (state.lineIndex !== anchorLine) {
+          state.lineIndex = anchorLine;
         }
         render();
 
@@ -1146,14 +1524,19 @@
         state.autoToken = token;
         state.autoPlaying = true;
         autoPlayBtn.textContent = "停止连续听练";
-        const scopeStartUnit = fromLevelStart ? 0 : state.unitIndex;
-        const scopeEndUnit = loopCurrentUnit ? scopeStartUnit : getCurrentLevel().units.length - 1;
+        const scopeEndUnit = loopCurrentUnit ? anchorUnitClamped : levelLastUnit;
         let firstCycle = true;
 
         while (token === state.autoToken) {
+          let scopeStartUnit;
+          if (fromLevelStart) {
+            scopeStartUnit = firstCycle ? anchorUnitClamped : 0;
+          } else {
+            scopeStartUnit = anchorUnitClamped;
+          }
           for (let unitIdx = scopeStartUnit; unitIdx <= scopeEndUnit; unitIdx += 1) {
             const unit = getCurrentLevel().units[unitIdx];
-            const startLineIdx = unitIdx === scopeStartUnit && firstCycle ? state.lineIndex : 0;
+            const startLineIdx = unitIdx === scopeStartUnit && firstCycle ? anchorLine : 0;
             for (let lineIdx = startLineIdx; lineIdx < unit.lines.length; lineIdx += 1) {
               if (token !== state.autoToken) {
                 return;
@@ -1328,6 +1711,8 @@
         await startAutoPlayFromGesture({ fromUnitStart: true, loopCurrentUnit: true, repeat: true });
       });
       startDailyPlanBtn.addEventListener("click", async () => {
+        state.unitIndex = 0;
+        state.lineIndex = 0;
         await startAutoPlayFromGesture({ fromLevelStart: true, loopCurrentUnit: false, repeat: false });
       });
       stopDailyPlanBtn.addEventListener("click", stopAutoPlay);
