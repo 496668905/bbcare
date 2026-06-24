@@ -1581,16 +1581,16 @@
               if (token !== state.autoToken) {
                 return;
               }
-              await wait(100);
+              await wait(80);
               // Chinese explanation always uses system TTS.
               await speakBySystem(`中文意思：${line.zh}`, { lang: "zh-CN", rate: 0.93 });
               if (token !== state.autoToken) {
                 return;
               }
-              await wait(120);
+              await wait(80);
               await speak(line.en, { lang: "en-US", rate: 0.78, audioKey });
               addDailySeconds(14);
-              await wait(450);
+              await wait(1000);
             }
             /* 每课之间额外等待，让用户有心理预期 */
             if (token !== state.autoToken) {
@@ -1599,7 +1599,7 @@
             const nextUnitIdx = unitIdx + 1;
             if (nextUnitIdx <= scopeEndUnit || (repeat && !loopCurrentUnit)) {
               /* 非最后一课，或还会循环时，加一点间隔 */
-              await wait(1200);
+              await wait(1000);
             }
           }
 
