@@ -1135,6 +1135,7 @@
       gestureUnlockAudio.setAttribute("playsinline", "");
 
       async function unlockAudioPlaybackFromGesture() {
+        /* 1. 解锁 Audio 元素 */
         gestureUnlockAudio.muted = true;
         gestureUnlockAudio.src = SILENT_WAV;
         try {
@@ -1151,6 +1152,15 @@
             /* ignore */
           }
           gestureUnlockAudio.muted = false;
+        }
+        /* 2. 解锁 Web Speech API（移动端必须先触发一次 speak 才能正常工作） */
+        if ("speechSynthesis" in window) {
+          speechSynthesis.cancel();
+          const dummy = new SpeechSynthesisUtterance("");
+          dummy.rate = 1;
+          speechSynthesis.speak(dummy);
+          await new Promise((r) => setTimeout(r, 100));
+          speechSynthesis.cancel();
         }
       }
 
@@ -1188,7 +1198,7 @@
 
       async function playLessonAudio(src, playbackRate = 1) {
         const el = lessonAudioPlayer;
-        const maxWaitMs = 45000;
+        const maxWaitMs = 10000;
         try {
           el.pause();
           el.removeAttribute("src");
@@ -1253,6 +1263,7 @@
         if (speechSynthesis.paused) {
           speechSynthesis.resume();
         }
+        /* iOS Safari 修复：短暂延迟让 cancel 生效 */
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.lang = options.lang || "en-US";
         utterance.rate = options.rate ?? 0.86;
@@ -1267,17 +1278,22 @@
             if (settled) return;
             settled = true;
             clearTimeout(timer);
+            clearInterval(poller);
             utterance.onend = null;
             utterance.onerror = null;
             resolve();
           };
+          /* 超时兜底：8 秒，移动端 TTS 不稳定时快速跳过 */
           const timer = window.setTimeout(() => {
-            /* 超时兜底：Web Speech API 在部分浏览器可能不触发 onend */
-            try {
-              speechSynthesis.cancel();
-            } catch { /* ignore */ }
+            try { speechSynthesis.cancel(); } catch { /* ignore */ }
             done();
-          }, 30000);
+          }, 8000);
+          /* iOS Safari 兜底：轮询 speaking 状态，因为 onend 可能不触发 */
+          const poller = window.setInterval(() => {
+            if (!speechSynthesis.speaking && !settled) {
+              done();
+            }
+          }, 500);
           utterance.onend = () => done();
           utterance.onerror = () => done();
           speechSynthesis.speak(utterance);
