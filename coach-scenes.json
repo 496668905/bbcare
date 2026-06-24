@@ -1,0 +1,447 @@
+{
+  "version": 1,
+  "scenes": [
+    {
+      "id": "coffee_order",
+      "titleZh": "咖啡店点单",
+      "titleEn": "Ordering coffee",
+      "openingZh": "店员用英文招呼你，按提示用英文回答。",
+      "turns": [
+        {
+          "role": "assistant",
+          "en": "Hi there! What can I get for you today?",
+          "zh": "你好！今天想喝点什么？"
+        },
+        {
+          "role": "user",
+          "promptZh": "你想点一杯中杯热拿铁，外带。",
+          "acceptable": [
+            "I'd like a medium hot latte to go please",
+            "Can I get a medium latte to go",
+            "I want a medium latte to go",
+            "A medium latte to go please"
+          ],
+          "keywords": ["latte", "medium", "to go"],
+          "hintEn": "I'd like a medium latte to go, please."
+        },
+        {
+          "role": "assistant",
+          "en": "Sure! Anything else? Less sugar?",
+          "zh": "好的！还要别的吗？要少糖吗？"
+        },
+        {
+          "role": "user",
+          "promptZh": "你说只要少糖，别的不要了，谢谢。",
+          "acceptable": [
+            "Less sugar please that's all thank you",
+            "Just less sugar thanks that's all",
+            "Less sugar only thanks",
+            "Could I have less sugar please that's it thank you"
+          ],
+          "keywords": ["less sugar", "thank"],
+          "hintEn": "Less sugar, please. That's all, thank you."
+        }
+      ]
+    },
+    {
+      "id": "hotel_checkin",
+      "titleZh": "酒店入住",
+      "titleEn": "Hotel check-in",
+      "openingZh": "前台办理入住，回答前台的问题。",
+      "turns": [
+        {
+          "role": "assistant",
+          "en": "Good evening! Do you have a reservation with us?",
+          "zh": "晚上好！您有预订吗？"
+        },
+        {
+          "role": "user",
+          "promptZh": "你说有预订，姓名是 Wang，单人间两晚。",
+          "acceptable": [
+            "Yes I have a reservation under Wang a single room for two nights",
+            "I booked a single room for two nights the name is Wang",
+            "Reservation under Wang single room two nights"
+          ],
+          "keywords": ["reservation", "wang", "single", "two nights"],
+          "hintEn": "Yes, I have a reservation under Wang. A single room for two nights."
+        },
+        {
+          "role": "assistant",
+          "en": "May I see your passport, please?",
+          "zh": "请出示护照好吗？"
+        },
+        {
+          "role": "user",
+          "promptZh": "递上护照并说：这是我的护照。",
+          "acceptable": [
+            "Here is my passport",
+            "Here you are this is my passport",
+            "Sure here is my passport"
+          ],
+          "keywords": ["passport", "here"],
+          "hintEn": "Here is my passport."
+        }
+      ]
+    },
+    {
+      "id": "directions",
+      "titleZh": "问路指路",
+      "titleEn": "Asking for directions",
+      "openingZh": "你在街头向路人问路。",
+      "turns": [
+        {
+          "role": "assistant",
+          "en": "Hi, can I help you?",
+          "zh": "你好，需要帮忙吗？"
+        },
+        {
+          "role": "user",
+          "promptZh": "问最近的地铁站在哪里。",
+          "acceptable": [
+            "Excuse me where is the nearest subway station",
+            "Could you tell me where the nearest metro station is",
+            "Where can I find the nearest subway station please"
+          ],
+          "keywords": ["nearest", "subway", "station"],
+          "hintEn": "Excuse me, where is the nearest subway station?"
+        },
+        {
+          "role": "assistant",
+          "en": "Go straight and turn left at the second traffic light.",
+          "zh": "直走，在第二个红绿灯左转。"
+        },
+        {
+          "role": "user",
+          "promptZh": "表示感谢并说你会试试。",
+          "acceptable": [
+            "Thank you I will try that",
+            "Thanks a lot I appreciate it",
+            "Thank you very much"
+          ],
+          "keywords": ["thank"],
+          "hintEn": "Thank you, I'll try that."
+        }
+      ]
+    },
+    {
+      "id": "baby_english",
+      "titleZh": "和宝宝说英语",
+      "titleEn": "English with your baby",
+      "openingZh": "用简单、温柔的英语和宝宝互动。",
+      "turns": [
+        {
+          "role": "assistant",
+          "en": "(The baby looks at you.) Say something sweet!",
+          "zh": "宝宝看着你，说点温柔的话。"
+        },
+        {
+          "role": "user",
+          "promptZh": "说：该睡觉啦，晚安小宝贝。",
+          "acceptable": [
+            "Time for bed good night little one",
+            "It's bedtime sweet dreams baby",
+            "Let's sleep good night my baby"
+          ],
+          "keywords": ["bed", "good night", "baby"],
+          "hintEn": "Time for bed. Good night, little one."
+        },
+        {
+          "role": "assistant",
+          "en": "Can you say something about food?",
+          "zh": "再说一句和吃的有关的简单英语。"
+        },
+        {
+          "role": "user",
+          "promptZh": "说：喝牛奶长高高。",
+          "acceptable": [
+            "Drink your milk so you can grow big and strong",
+            "Have some milk it helps you grow",
+            "Let's drink milk together"
+          ],
+          "keywords": ["milk", "grow"],
+          "hintEn": "Drink your milk so you can grow big and strong."
+        }
+      ]
+    },
+    {
+      "id": "clinic_visit",
+      "titleZh": "看病描述症状",
+      "titleEn": "At the clinic",
+      "openingZh": "向医生简单描述症状。",
+      "turns": [
+        {
+          "role": "assistant",
+          "en": "Good morning. What seems to be the problem?",
+          "zh": "早上好，哪里不舒服？"
+        },
+        {
+          "role": "user",
+          "promptZh": "说从昨天开始头疼和发烧。",
+          "acceptable": [
+            "Since yesterday I have had a headache and a fever",
+            "I have a headache and fever since yesterday",
+            "My head hurts and I have been feverish since yesterday"
+          ],
+          "keywords": ["headache", "fever", "yesterday"],
+          "hintEn": "Since yesterday I've had a headache and a fever."
+        },
+        {
+          "role": "assistant",
+          "en": "Any allergies to medicine?",
+          "zh": "对药物过敏吗？"
+        },
+        {
+          "role": "user",
+          "promptZh": "说你对青霉素过敏。",
+          "acceptable": [
+            "I am allergic to penicillin",
+            "Yes I am allergic to penicillin",
+            "Penicillin allergy for me"
+          ],
+          "keywords": ["allergic", "penicillin"],
+          "hintEn": "I'm allergic to penicillin."
+        }
+      ]
+    },
+    {
+      "id": "restaurant_book",
+      "titleZh": "餐厅订位",
+      "titleEn": "Restaurant reservation",
+      "openingZh": "打电话给餐厅订位。",
+      "turns": [
+        {
+          "role": "assistant",
+          "en": "Hello, this is Green Leaf Restaurant. How can I help you?",
+          "zh": "您好，绿叶餐厅，有什么可以帮您？"
+        },
+        {
+          "role": "user",
+          "promptZh": "想订今晚七点的两人桌，靠窗更好。",
+          "acceptable": [
+            "I'd like to book a table for two at seven tonight near the window if possible",
+            "Table for two at seven tonight by the window please",
+            "Can I reserve a table for two at seven this evening window seat"
+          ],
+          "keywords": ["two", "seven", "table", "tonight"],
+          "hintEn": "I'd like to book a table for two at seven tonight, near the window if possible."
+        }
+      ]
+    },
+    {
+      "id": "taxi_ride",
+      "titleZh": "打车",
+      "titleEn": "Taking a taxi",
+      "openingZh": "上车后与司机沟通。",
+      "turns": [
+        {
+          "role": "assistant",
+          "en": "Where to, sir?",
+          "zh": "去哪儿，先生？"
+        },
+        {
+          "role": "user",
+          "promptZh": "请司机去火车站，并问大概多久。",
+          "acceptable": [
+            "Could you take me to the train station how long will it take",
+            "To the train station please how long does it take",
+            "Train station please how long will it be"
+          ],
+          "keywords": ["train station", "how long"],
+          "hintEn": "Could you take me to the train station? How long will it take?"
+        }
+      ]
+    },
+    {
+      "id": "shopping_return",
+      "titleZh": "商场退换货",
+      "titleEn": "Return at the store",
+      "openingZh": "在柜台办理退货。",
+      "turns": [
+        {
+          "role": "assistant",
+          "en": "Hi! Do you have the receipt with you?",
+          "zh": "您好！带收据了吗？"
+        },
+        {
+          "role": "user",
+          "promptZh": "说你想退这件衬衫，小票在这里。",
+          "acceptable": [
+            "I would like to return this shirt here is the receipt",
+            "I'd like a refund for this shirt here's my receipt",
+            "Return this shirt please here is the receipt"
+          ],
+          "keywords": ["return", "shirt", "receipt"],
+          "hintEn": "I'd like to return this shirt. Here is the receipt."
+        }
+      ]
+    },
+    {
+      "id": "bank_counter",
+      "titleZh": "银行柜台",
+      "titleEn": "At the bank",
+      "openingZh": "简单办理业务用语。",
+      "turns": [
+        {
+          "role": "assistant",
+          "en": "How may I help you today?",
+          "zh": "今天需要什么服务？"
+        },
+        {
+          "role": "user",
+          "promptZh": "说你想从储蓄账户取两百美元现金。",
+          "acceptable": [
+            "I would like to withdraw two hundred dollars from my savings account",
+            "Can I withdraw two hundred dollars cash from savings",
+            "Two hundred dollars cash from my savings account please"
+          ],
+          "keywords": ["withdraw", "two hundred", "savings"],
+          "hintEn": "I'd like to withdraw two hundred dollars from my savings account."
+        }
+      ]
+    },
+    {
+      "id": "airport_checkin",
+      "titleZh": "机场值机",
+      "titleEn": "Airport check-in",
+      "openingZh": "在柜台办理登机。",
+      "turns": [
+        {
+          "role": "assistant",
+          "en": "Passport and ticket, please.",
+          "zh": "请出示护照和机票。"
+        },
+        {
+          "role": "user",
+          "promptZh": "递材料并说：这是我的护照和电子登机牌。",
+          "acceptable": [
+            "Here is my passport and my mobile boarding pass",
+            "Here you are passport and boarding pass on my phone",
+            "This is my passport and electronic boarding pass"
+          ],
+          "keywords": ["passport", "boarding pass"],
+          "hintEn": "Here is my passport and my mobile boarding pass."
+        }
+      ]
+    },
+    {
+      "id": "phone_support",
+      "titleZh": "电话客服（网络故障）",
+      "titleEn": "Tech support call",
+      "openingZh": "向客服描述网络问题。",
+      "turns": [
+        {
+          "role": "assistant",
+          "en": "Support line speaking. What issue are you having?",
+          "zh": "客服热线，遇到什么问题？"
+        },
+        {
+          "role": "user",
+          "promptZh": "说家里的 Wi-Fi 很慢还经常断线。",
+          "acceptable": [
+            "My home Wi-Fi is very slow and it keeps dropping",
+            "The Wi-Fi at home is slow and disconnects often",
+            "Home internet is slow and keeps cutting out"
+          ],
+          "keywords": ["wi-fi", "slow", "disconnect"],
+          "hintEn": "My home Wi-Fi is very slow and it keeps dropping."
+        }
+      ]
+    },
+    {
+      "id": "gym_trial",
+      "titleZh": "健身房咨询体验课",
+      "titleEn": "Gym trial class",
+      "openingZh": "向前台咨询体验。",
+      "turns": [
+        {
+          "role": "assistant",
+          "en": "Welcome! Are you interested in a trial class?",
+          "zh": "欢迎！想体验一下课程吗？"
+        },
+        {
+          "role": "user",
+          "promptZh": "问能不能明天晚上预约一节免费体验课。",
+          "acceptable": [
+            "Can I book a free trial class for tomorrow evening",
+            "Is it possible to try a class tomorrow night for free",
+            "I'd like a free trial tomorrow evening please"
+          ],
+          "keywords": ["trial", "tomorrow", "evening", "free"],
+          "hintEn": "Can I book a free trial class for tomorrow evening?"
+        }
+      ]
+    },
+    {
+      "id": "school_meeting",
+      "titleZh": "家长会简短沟通",
+      "titleEn": "Parent-teacher talk",
+      "openingZh": "与老师简短交流孩子学习。",
+      "turns": [
+        {
+          "role": "assistant",
+          "en": "Thanks for coming. How is English practice at home?",
+          "zh": "谢谢你来。孩子在家英语练得怎么样？"
+        },
+        {
+          "role": "user",
+          "promptZh": "说你们每天晚饭后会读十分钟英文绘本。",
+          "acceptable": [
+            "We read English picture books for ten minutes after dinner every day",
+            "After dinner we read English books for ten minutes daily",
+            "Ten minutes of English reading after dinner each day"
+          ],
+          "keywords": ["ten minutes", "after dinner", "english"],
+          "hintEn": "We read English picture books for ten minutes after dinner every day."
+        }
+      ]
+    },
+    {
+      "id": "hotel_complaint",
+      "titleZh": "酒店投诉（空调）",
+      "titleEn": "Hotel complaint",
+      "openingZh": "礼貌地向酒店反映房间问题。",
+      "turns": [
+        {
+          "role": "assistant",
+          "en": "Front desk. How can I help?",
+          "zh": "前台，有什么可以帮您？"
+        },
+        {
+          "role": "user",
+          "promptZh": "说房间空调不制冷，能否派人来看一下。",
+          "acceptable": [
+            "The air conditioner in my room is not cooling could someone take a look",
+            "My AC is not cooling could you send someone to check it",
+            "The air conditioning doesn't work well could you help"
+          ],
+          "keywords": ["air conditioner", "cooling", "room"],
+          "hintEn": "The air conditioner in my room is not cooling. Could someone take a look?"
+        }
+      ]
+    },
+    {
+      "id": "customs_entry",
+      "titleZh": "入境简短问答",
+      "titleEn": "Border entry (short)",
+      "openingZh": "模拟边检常见简单问题。",
+      "turns": [
+        {
+          "role": "assistant",
+          "en": "What is the purpose of your visit?",
+          "zh": "你此行的目的是？"
+        },
+        {
+          "role": "user",
+          "promptZh": "回答：旅游，待一周。",
+          "acceptable": [
+            "Tourism I am staying for one week",
+            "Sightseeing for a week",
+            "Vacation about one week"
+          ],
+          "keywords": ["tourism", "sightseeing", "week", "vacation"],
+          "hintEn": "Tourism. I'm staying for one week."
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#140805" />
+    <title>英语竞技场 · 第二版 疾速真伪</title>
+    <link rel="stylesheet" href="./adult-game-b.css" />
+  </head>
+  <body>
+    <canvas id="fxB" aria-hidden="true"></canvas>
+    <div class="b-shell">
+      <header class="b-top">
+        <button type="button" class="b-btn ghost" id="bBack">← 大人口语</button>
+        <div class="b-brand">
+          <h1>竞技场 · 第二版</h1>
+          <p>真伪秒判 · 介词闪电 · 听力二选一</p>
+        </div>
+        <button type="button" class="b-btn ghost" id="bMute" title="音效">🔊</button>
+      </header>
+      <main class="b-main">
+        <section id="bMenu" class="b-screen on">
+          <div class="b-hero">
+            <h2>节奏更快，判断更狠</h2>
+            <p>
+              与第一版不同：本版主打<strong>二选一真伪</strong>、<strong>介词搭配</strong>、<strong>听力对错</strong>与<strong>一词多义</strong>。用「能量条」代替生命：答错扣能量，归零即结束。
+            </p>
+          </div>
+          <div class="b-row2">
+            <button type="button" class="b-btn" id="bStart">开始疾速局</button>
+            <button type="button" class="b-btn ghost" id="bToV1">去第一版竞技场</button>
+          </div>
+          <div class="b-card" style="margin-top: 14px">
+            <div class="b-pill">规则</div>
+            <p style="margin: 0; color: var(--b-muted); line-height: 1.55; font-size: 14px">
+              每题限时更短；连对会<strong>回血</strong>并提高得分倍率。听力题请允许页面发声。可随时切回第一版换换口味。
+            </p>
+          </div>
+        </section>
+
+        <section id="bPlay" class="b-screen">
+          <div class="b-hud">
+            <div class="cell">
+              <div class="lab">得分</div>
+              <div class="num" id="bScore">0</div>
+            </div>
+            <div class="cell">
+              <div class="lab">连击</div>
+              <div class="num alt" id="bCombo">0</div>
+            </div>
+            <div class="cell">
+              <div class="lab">回合</div>
+              <div class="num" id="bRound">0</div>
+            </div>
+          </div>
+          <div class="energy" aria-hidden="true"><i id="bEnergy"></i></div>
+          <div class="energy timebar" aria-hidden="true"><i id="bTime"></i></div>
+          <div class="b-card">
+            <span class="b-pill" id="bPill">MODE</span>
+            <div class="b-en" id="bEn"></div>
+            <div class="b-zh" id="bZh"></div>
+            <div class="b-actions" id="bActions"></div>
+          </div>
+          <div class="b-foot">
+            <button type="button" class="b-link" id="bSkip">跳过本题 (−8 分)</button>
+            <button type="button" class="b-link" id="bListen" hidden>再听一遍</button>
+          </div>
+        </section>
+
+        <section id="bOver" class="b-screen">
+          <div class="b-hero">
+            <h2 id="bOverTitle">本局结束</h2>
+            <p id="bOverSub"></p>
+          </div>
+          <div class="b-stats" id="bStats"></div>
+          <div class="b-row2">
+            <button type="button" class="b-btn" id="bRetry">再来一局</button>
+            <button type="button" class="b-btn ghost" id="bMenu">返回菜单</button>
+          </div>
+        </section>
+      </main>
+    </div>
+    <script src="./adult-game-b.js"></script>
+    <script>
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker.register("./sw.js").catch(() => {});
+        });
+      }
+    </script>
+  </body>
+</html>

@@ -234,6 +234,18 @@
         </section>
 
         <section class="panel">
+          <h3>趣味竞技场</h3>
+          <p>多题型闯关：中英互点、听力、拼词、语法、完形、分类风暴。连击加分，每 5 关 BOSS。</p>
+          <section class="grid2" style="margin-bottom: 0;">
+            <button id="arenaBtn" class="btn good" type="button">竞技场 第一版</button>
+            <button id="arenaBBtn" class="btn secondary" type="button">竞技场 第二版</button>
+          </section>
+          <button id="coachBtn" class="btn secondary" type="button" style="width: 100%; margin-top: 10px">
+            口语模拟教练（场景对话 · 录音评分）
+          </button>
+        </section>
+
+        <section class="panel">
           <h3>每日 15 分钟计划</h3>
           <p id="dailyPlanText">今日听练进度：0 / 15 分钟</p>
           <p id="dailyPlanHint">建议在车上至少完成 15 分钟连续听练。</p>
@@ -1249,8 +1261,24 @@
           utterance.voice = selectedVoice;
         }
         return new Promise((resolve) => {
-          utterance.onend = () => resolve();
-          utterance.onerror = () => resolve();
+          let settled = false;
+          const done = () => {
+            if (settled) return;
+            settled = true;
+            clearTimeout(timer);
+            utterance.onend = null;
+            utterance.onerror = null;
+            resolve();
+          };
+          const timer = window.setTimeout(() => {
+            /* 超时兜底：Web Speech API 在部分浏览器可能不触发 onend */
+            try {
+              speechSynthesis.cancel();
+            } catch { /* ignore */ }
+            done();
+          }, 30000);
+          utterance.onend = () => done();
+          utterance.onerror = () => done();
           speechSynthesis.speak(utterance);
         });
       }
@@ -1535,6 +1563,9 @@
             scopeStartUnit = anchorUnitClamped;
           }
           for (let unitIdx = scopeStartUnit; unitIdx <= scopeEndUnit; unitIdx += 1) {
+            if (token !== state.autoToken) {
+              return;
+            }
             const unit = getCurrentLevel().units[unitIdx];
             const startLineIdx = unitIdx === scopeStartUnit && firstCycle ? anchorLine : 0;
             for (let lineIdx = startLineIdx; lineIdx < unit.lines.length; lineIdx += 1) {
@@ -1560,6 +1591,15 @@
               await speak(line.en, { lang: "en-US", rate: 0.78, audioKey });
               addDailySeconds(14);
               await wait(450);
+            }
+            /* 每课之间额外等待，让用户有心理预期 */
+            if (token !== state.autoToken) {
+              return;
+            }
+            const nextUnitIdx = unitIdx + 1;
+            if (nextUnitIdx <= scopeEndUnit || (repeat && !loopCurrentUnit)) {
+              /* 非最后一课，或还会循环时，加一点间隔 */
+              await wait(1200);
             }
           }
 
@@ -1677,6 +1717,18 @@
         render();
       }
 
+      document.getElementById("arenaBtn").addEventListener("click", () => {
+        stopAutoPlay();
+        window.location.href = "./adult-game.html";
+      });
+      document.getElementById("arenaBBtn").addEventListener("click", () => {
+        stopAutoPlay();
+        window.location.href = "./adult-game-b.html";
+      });
+      document.getElementById("coachBtn").addEventListener("click", () => {
+        stopAutoPlay();
+        window.location.href = "./coach.html";
+      });
       homeBtn.addEventListener("click", () => {
         stopAutoPlay();
         disableKeepAwakeMode();

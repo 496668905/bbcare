@@ -1,0 +1,328 @@
+/* 英语竞技场 · 第二版「疾速真伪」火山金主题 */
+:root {
+  --b-bg0: #140805;
+  --b-bg1: #2a120c;
+  --b-ink: #fff4e8;
+  --b-muted: #c9a88c;
+  --b-fire: #ff6b2d;
+  --b-gold: #ffc14d;
+  --b-magma: #ff3d6b;
+  --b-good: #5ef5a9;
+  --b-card: rgba(42, 18, 12, 0.88);
+  --b-line: rgba(255, 193, 77, 0.35);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100svh;
+  background: radial-gradient(900px 700px at 80% 0%, #3a1510 0%, var(--b-bg0) 55%, #050302 100%);
+  color: var(--b-ink);
+  font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+
+#fxB {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 40;
+}
+
+.b-shell {
+  position: relative;
+  z-index: 5;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+}
+
+.b-top {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 8px;
+  align-items: center;
+  padding: 10px 12px calc(10px + env(safe-area-inset-top));
+  background: linear-gradient(180deg, rgba(20, 8, 5, 0.94), rgba(20, 8, 5, 0.55));
+  border-bottom: 1px solid var(--b-line);
+  backdrop-filter: blur(10px);
+}
+
+.b-brand {
+  text-align: center;
+}
+
+.b-brand h1 {
+  margin: 0;
+  font-size: clamp(17px, 4vw, 24px);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  background: linear-gradient(90deg, var(--b-fire), var(--b-gold));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.b-brand p {
+  margin: 2px 0 0;
+  font-size: clamp(11px, 2.8vw, 14px);
+  color: var(--b-muted);
+}
+
+.b-btn {
+  border: 0;
+  border-radius: 14px;
+  padding: 10px 12px;
+  font-weight: 800;
+  font-size: clamp(13px, 3.2vw, 17px);
+  cursor: pointer;
+  color: #1a0a04;
+  background: linear-gradient(135deg, var(--b-gold), var(--b-fire));
+}
+
+.b-btn.ghost {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--b-ink);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.b-main {
+  flex: 1;
+  padding: 12px 12px calc(18px + env(safe-area-inset-bottom));
+  max-width: 720px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.b-screen {
+  display: none;
+}
+
+.b-screen.on {
+  display: block;
+  animation: bFade 0.32s ease both;
+}
+
+@keyframes bFade {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.b-hero {
+  text-align: center;
+  padding: 14px 6px;
+}
+
+.b-hero h2 {
+  margin: 0;
+  font-size: clamp(20px, 5vw, 30px);
+}
+
+.b-hero p {
+  margin: 10px 0 0;
+  color: var(--b-muted);
+  line-height: 1.55;
+  font-size: clamp(13px, 3.2vw, 17px);
+}
+
+.b-row2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.b-card {
+  background: var(--b-card);
+  border-radius: 18px;
+  padding: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
+}
+
+.b-hud {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.b-hud .cell {
+  text-align: center;
+  padding: 10px 8px;
+  border-radius: 14px;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.b-hud .lab {
+  font-size: 10px;
+  color: var(--b-muted);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.b-hud .num {
+  margin-top: 4px;
+  font-size: clamp(17px, 4.6vw, 24px);
+  font-weight: 900;
+  color: var(--b-gold);
+}
+
+.b-hud .num.alt {
+  color: var(--b-magma);
+}
+
+.energy {
+  height: 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+  margin: 8px 0 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.energy > i {
+  display: block;
+  height: 100%;
+  width: 100%;
+  transform-origin: left center;
+  transform: scaleX(var(--e, 1));
+  background: linear-gradient(90deg, var(--b-magma), var(--b-fire), var(--b-gold));
+  transition: transform 0.15s ease-out;
+}
+
+.energy.timebar {
+  margin-top: 6px;
+  height: 8px;
+}
+
+.energy.timebar > i {
+  background: linear-gradient(90deg, #4d8cff, var(--b-gold));
+  transform: scaleX(var(--t, 1));
+}
+
+.b-pill {
+  display: inline-block;
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #120502;
+  background: rgba(255, 193, 77, 0.95);
+  margin-bottom: 8px;
+}
+
+.b-en {
+  font-size: clamp(19px, 5vw, 30px);
+  font-weight: 900;
+  line-height: 1.25;
+  text-align: center;
+  margin: 6px 0;
+}
+
+.b-zh {
+  font-size: clamp(15px, 4vw, 22px);
+  color: var(--b-muted);
+  text-align: center;
+  line-height: 1.4;
+  margin: 6px 0 10px;
+}
+
+.b-actions {
+  display: grid;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.b-actions.two {
+  grid-template-columns: 1fr 1fr;
+}
+
+.b-big {
+  border-radius: 16px;
+  padding: 16px 12px;
+  font-size: clamp(17px, 4.4vw, 22px);
+  font-weight: 900;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  cursor: pointer;
+  color: var(--b-ink);
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.b-big.ok {
+  background: linear-gradient(135deg, rgba(94, 245, 169, 0.35), rgba(94, 245, 169, 0.12));
+  border-color: rgba(94, 245, 169, 0.55);
+}
+
+.b-big.no {
+  background: linear-gradient(135deg, rgba(255, 61, 107, 0.35), rgba(255, 61, 107, 0.12));
+  border-color: rgba(255, 61, 107, 0.55);
+}
+
+.b-big:active {
+  transform: scale(0.99);
+}
+
+.b-foot {
+  margin-top: 12px;
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.b-link {
+  background: none;
+  border: 0;
+  color: var(--b-gold);
+  font-weight: 800;
+  cursor: pointer;
+  text-decoration: underline;
+  font-size: 14px;
+}
+
+.b-stats {
+  margin-top: 12px;
+}
+
+.b-stats .line {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-radius: 12px;
+  margin-bottom: 8px;
+  background: rgba(0, 0, 0, 0.22);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.b-stats .line b {
+  color: var(--b-fire);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}

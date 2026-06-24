@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#0a0e1a" />
+    <title>英语竞技场 · 大人趣味闯关</title>
+    <link rel="stylesheet" href="./adult-game.css" />
+  </head>
+  <body class="arena-app">
+    <canvas id="fxCanvas" aria-hidden="true"></canvas>
+    <div class="arena-shell">
+      <header class="arena-top">
+        <button type="button" class="arena-btn ghost" id="backBtn">← 大人口语</button>
+        <div class="arena-brand">
+          <h1>英语竞技场</h1>
+          <p>连击 · 闯关 · 语感拉满</p>
+        </div>
+        <button type="button" class="arena-btn ghost" id="muteBtn" title="音效">🔊</button>
+      </header>
+      <main class="arena-main">
+        <section id="screenMenu" class="screen active">
+          <div class="menu-hero">
+            <h2>准备好被英语“虐”到上瘾了吗？</h2>
+            <p>
+              六种玩法随机混合：中英互点、听力抓句、拼词拆弹、语法找茬、完形填空、分类风暴。难度会随回合自动爬升。
+            </p>
+          </div>
+          <div class="mode-grid" id="modeGrid"></div>
+          <button type="button" class="arena-btn ghost" id="toGameB" style="width: 100%; margin-top: 10px">
+            进入第二版：疾速真伪（真伪 · 介词 · 听力二选一）→
+          </button>
+          <div class="tutorial">
+            <strong>小贴士：</strong>尽量连对触发 <strong>COMBO</strong> 加分；每 <strong>5</strong> 关进入一次
+            <strong>BOSS</strong> 限时挑战。可在右上角关闭音效。听力题依赖浏览器朗读（请允许页面发声）。
+          </div>
+          <ul class="ach-list" id="achList" aria-label="成就列表"></ul>
+        </section>
+
+        <section id="screenGame" class="screen">
+          <div class="hud">
+            <div class="hud-card">
+              <div class="label">得分</div>
+              <div class="value" id="hudScore">0</div>
+            </div>
+            <div class="hud-card">
+              <div class="label">连击</div>
+              <div class="value alt" id="hudCombo">0</div>
+            </div>
+            <div class="hud-card">
+              <div class="label">生命</div>
+              <div class="value life" id="hudLives">♥♥♥</div>
+            </div>
+          </div>
+          <div class="timer-bar" aria-hidden="true"><i id="timerFill"></i></div>
+          <div class="combo-meter" id="comboMeter"></div>
+          <div class="prompt-card">
+            <span class="mode-pill" id="modePill">MODE</span>
+            <div class="prompt-en" id="promptEn"></div>
+            <div class="prompt-zh" id="promptZh"></div>
+            <div class="prompt-hint" id="promptHint"></div>
+            <div class="scramble-letters" id="scrambleWrap" hidden></div>
+            <div class="scramble-input" id="scrambleInput" hidden></div>
+          </div>
+          <div class="choice-grid" id="choiceGrid"></div>
+          <div class="row-actions">
+            <button type="button" class="arena-btn ghost" id="skipBtn">跳过 (−1 分)</button>
+            <button type="button" class="arena-btn" id="listenAgainBtn" hidden>再听一遍</button>
+          </div>
+        </section>
+
+        <section id="screenOver" class="screen">
+          <div class="menu-hero">
+            <h2 id="overTitle">本局结束</h2>
+            <p id="overSub"></p>
+          </div>
+          <div class="stats-grid" id="overStats"></div>
+          <div class="row-actions">
+            <button type="button" class="arena-btn" id="retryBtn">再来一局</button>
+            <button type="button" class="arena-btn gold" id="menuBtn">返回菜单</button>
+          </div>
+        </section>
+      </main>
+    </div>
+    <script src="./adult-game.js"></script>
+    <script>
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker.register("./sw.js").catch(() => {});
+        });
+      }
+    </script>
+  </body>
+</html>
