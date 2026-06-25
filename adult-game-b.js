@@ -378,6 +378,15 @@
       u.rate = 0.9;
       speechSynthesis.speak(u);
     }
+    /** 移动端需要用户手势触发一次 dummy speak 来解锁 Web Speech API */
+    unlockSpeech() {
+      if (!("speechSynthesis" in window)) return;
+      speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance("");
+      u.rate = 1;
+      speechSynthesis.speak(u);
+      setTimeout(() => { try { speechSynthesis.cancel(); } catch {} }, 100);
+    }
     showMenu() {
       this.clearTick();
       this.ui.menu();
@@ -389,9 +398,18 @@
       }
     }
     start() {
-      this.reset();
-      this.ui.play();
-      this.next();
+      try {
+        this.reset();
+        this.unlockSpeech(); /* 移动端 TTS 解锁 */
+        this.ui.play();
+        this.next();
+      } catch (err) {
+        console.error("[arena-b] start() 失败:", err);
+        /* 在界面上显示错误，方便手机端排查 */
+        const enEl = document.getElementById("bEn");
+        if (enEl) enEl.textContent = "启动出错: " + String(err.message || err);
+        this.ui.showMenu();
+      }
     }
     end() {
       this.clearTick();
@@ -573,36 +591,46 @@
     const ui = new UI();
     const app = { g: new Game(ui, sfx, fx, save) };
 
+    /* 安全绑定：某个元素找不到时不阻断其他事件注册 */
+    const bind = (id, fn) => {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener("click", fn);
+      else console.warn("[arena-b] 元素未找到:", id);
+    };
+
     document.getElementById("bMute").textContent = save.muted ? "🔇" : "🔊";
-    document.getElementById("bBack").addEventListener("click", () => {
+    bind("bBack", () => {
       window.location.href = "./adult.html";
     });
-    document.getElementById("bToV1").addEventListener("click", () => {
+    bind("bToV1", () => {
       window.location.href = "./adult-game.html";
     });
-    document.getElementById("bMute").addEventListener("click", () => {
+    bind("bMute", () => {
       save.muted = !save.muted;
       sfx.muted = save.muted;
       document.getElementById("bMute").textContent = save.muted ? "🔇" : "🔊";
       saveSave(save);
     });
-    document.getElementById("bStart").addEventListener("click", () => app.g.start());
-    document.getElementById("bRetry").addEventListener("click", () => {
+    bind("bStart", () => app.g.start());
+    bind("bRetry", () => {
       app.g = new Game(ui, sfx, fx, save);
       app.g.start();
     });
-    document.getElementById("bMenu").addEventListener("click", () => app.g.showMenu());
-    document.getElementById("bSkip").addEventListener("click", () => app.g.skip());
-    document.getElementById("bListen").addEventListener("click", () => {
+    bind("bBackBtn", () => app.g.showMenu());
+    /* 兼容旧版 HTML：旧版返回菜单按钮 ID 也是 bMenu */
+    const backBtn = document.getElementById("bBackBtn");
+    if (!backBtn) {
+      bind("bMenu", () => app.g.showMenu());
+    }
+    bind("bSkip", () => app.g.skip());
+    bind("bListen", () => {
       if (app.g.q?.speak) {
         app.g.speak(app.g.q.speak);
       }
     });
-    document.getElementById("bActions").addEventListener("click", (e) => {
+    bind("bActions", (e) => {
       const b = e.target.closest(".b-big");
-      if (!b) {
-        return;
-      }
+      if (!b) return;
       app.g.submit(b.dataset.val);
     });
   }
